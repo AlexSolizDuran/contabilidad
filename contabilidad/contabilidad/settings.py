@@ -55,10 +55,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         #'rest_framework.permissions.AllowAny', # todas las apis libres
         'rest_framework.permissions.IsAuthenticated',# para proteger las apis
-    ]
+    ]   
 }
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),  # duración del access token
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),  # duración del access token
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),   # duración del refresh token
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,

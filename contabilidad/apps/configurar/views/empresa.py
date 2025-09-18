@@ -9,9 +9,11 @@ class EmpresaViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        if self.request.user.is_authenticated:
-            return Empresa.objects.filter(id_Empresa=self.request.user.id)
-        return Empresa.objects.all()
+        user = self.request.user
+        if user.is_authenticated:
+            # Filtra las empresas donde está el usuario y devuelve solo la primera
+            return Empresa.objects.filter(userempresa__user=user)[:1]
+        return Empresa.objects.none()  # Ninguna empresa si no está autenticado
 
     def perform_create(self, serializer):
         # Creamos la empresa y asociamos al usuario autenticado automáticamente
