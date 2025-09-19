@@ -41,10 +41,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     "corsheaders",
-    'apps.gestion_asientos',
-    'apps.gestion_cuentas',
-    'apps.usuarios',
-    'apps.configurar'
+    'contabilidad.apps.gestion_asientos',
+    'contabilidad.apps.gestion_cuentas',
+    'contabilidad.apps.usuarios',
+    'contabilidad.apps.configurar'
 ]
 ## parte de djangoRestFramework
 REST_FRAMEWORK = {
@@ -99,17 +99,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'contabilidad.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 AUTH_USER_MODEL = "usuarios.User"
@@ -127,14 +116,24 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+#configurar para la base datos
+""""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'contabilidad',
-        'USER': 'tu_usuario',
-        'PASSWORD': 'tu_contraseña',
+        'NAME': 'contabilidad1',
+        'USER': 'user1',
+        'PASSWORD': 'si2conta',
         'HOST': 'localhost',  # o la IP de tu servidor de BD
-        'PORT': '5432',       # puerto por defecto de PostgreSQL
+        'PORT': '5555',       # puerto por defecto de PostgreSQL
+    }
+}
+"""
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",
     }
 }
 
