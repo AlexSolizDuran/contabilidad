@@ -162,6 +162,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
+    "https://contabilidad-p2d4.onrender.com",
     "http://localhost:3000",  # tu frontend Next.js
     "https://mi-frontend.com",
 ]
