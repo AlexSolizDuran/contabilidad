@@ -117,18 +117,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 #configurar para la base datos
-""""
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'contabilidad1',
+        'NAME': 'contabilidad_xx0h',
         'USER': 'user1',
-        'PASSWORD': 'si2conta',
-        'HOST': 'localhost',  # o la IP de tu servidor de BD
-        'PORT': '5555',       # puerto por defecto de PostgreSQL
+        'PASSWORD': 'cSJ6iTH4MQSthgV59yGBGEAIZ6hGLDjq',
+        'HOST': 'dpg-d36lv2juibrs739etv20-a.postgres.render.com',
+        'PORT': '5432',
     }
 }
-"""
+
 
 DATABASES = {
     'default': {
