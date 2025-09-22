@@ -117,7 +117,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 #configurar para la base datos
-
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -128,7 +128,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
+"""
 
 DATABASES = {
     'default': {
@@ -159,13 +159,12 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ALLOWED_HOSTS = [
-    "contabilidad-1.onrender.com",
-]
+ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOWED_ORIGINS = [
     "https://contabilidad-1.onrender.com",
     "http://localhost:3000",
     "https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
     "https://next-conta.vercel.app",
+    "https://contanextjs-393159630636.europe-west1.run.app",
 ]
