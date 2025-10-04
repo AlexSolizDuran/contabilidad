@@ -1,21 +1,30 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+
 from ...configurar.models.empresa import UserEmpresa
 from ..models.cuenta import Cuenta
-from rest_framework.response import Response
-from ..serializers.cuenta import CuentaSerializer
-from rest_framework.permissions import IsAuthenticated
-from ...gestion_asientos.models.movimiento import Movimiento
-from ...gestion_asientos.serializers.movimiento import MovimientoSerializer
-from rest_framework.decorators import action
-
+from ...gestion_asiento.models.movimiento import Movimiento
+from ...gestion_asiento.serializers.movimiento import MovimientoSerializer
+from ..serializers.cuenta import (CuentaCreateSerializer,
+                                  CuentaDetailSeriliazer,
+                                  CuentaListSerializer)
 
 
 class CuentaViewSet(viewsets.ModelViewSet):
     
     queryset = Cuenta.objects.all()
-    serializer_class = CuentaSerializer
+    serializer_class = CuentaListSerializer
     permission_classes = [IsAuthenticated]
-    
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return CuentaListSerializer
+        elif self.action in ['create', 'update', 'partial_update']:
+            return CuentaCreateSerializer
+        elif self.action in ['retrieve','destroy']:
+            return CuentaDetailSeriliazer
+        return super().get_serializer_class()
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated:

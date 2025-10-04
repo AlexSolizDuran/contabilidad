@@ -41,9 +41,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     "corsheaders",
-    'contabilidad.apps.gestion_asientos',
-    'contabilidad.apps.gestion_cuentas',
-    'contabilidad.apps.usuarios',
+    'contabilidad.apps.gestion_asiento',
+    'contabilidad.apps.gestion_cuenta',
+    'contabilidad.apps.usuario',
     'contabilidad.apps.configurar'
 ]
 ## parte de djangoRestFramework
@@ -121,22 +121,22 @@ AUTH_PASSWORD_VALIDATORS = [
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'contabilidad_xx0h',
-        'USER': 'user1',
-        'PASSWORD': 'cSJ6iTH4MQSthgV59yGBGEAIZ6hGLDjq',
-        'HOST': 'dpg-d36lv2juibrs739etv20-a.postgres.render.com',
+        'NAME': 'contabilidad',
+        'USER': 'postgres',
+        'PASSWORD': 'si$2$CONTA',
+        'HOST': '/cloudsql/concise-rampart-472723-j0:southamerica-east1:contabilidad',
         'PORT': '5432',
     }
 }
 
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / "db.sqlite3",
     }
 }
-
+'''
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 

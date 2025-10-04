@@ -1,10 +1,10 @@
 from django.db import models
-from ...usuarios.models.usuario import User
+from ...usuario.models.usuario import User
 
 class Empresa(models.Model):
     nombre = models.CharField(max_length=100)
     nit = models.PositiveIntegerField(null=True)
-    usuarios = models.ManyToManyField(User, through='UserEmpresa', related_name='empresas')
+    usuario = models.ManyToManyField(User, through='UserEmpresa', related_name='empresas')
     class Meta:
         db_table = "empresa"
         
@@ -17,6 +17,6 @@ class UserEmpresa(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
     rol = models.CharField(max_length=50, default='empleado')
     created_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)  
+    updated_at = models.DateTimeField(auto_now=True)  
     class Meta:
         db_table = "empresa_user"  

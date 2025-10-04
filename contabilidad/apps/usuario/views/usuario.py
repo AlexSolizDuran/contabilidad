@@ -7,15 +7,18 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import AllowAny
 
 class LoginView(generics.GenericAPIView):
+    
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginSerializer
+    
     def post(self, request):
+        
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
 
         if user is not None:
-            # Generar tokens
+            # Generar tokens sin empresa
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
@@ -30,7 +33,7 @@ class LoginView(generics.GenericAPIView):
                 key='refreshToken',
                 value=refresh_token,
                 httponly=True,       # JS no puede leerla
-                secure=False,        # poner True en producción con HTTPS
+                secure=True,        # poner True en producción con HTTPS
                 samesite='Strict',   # protección CSRF
                 max_age=7*24*60*60   # duración en segundos (opcional)
             )

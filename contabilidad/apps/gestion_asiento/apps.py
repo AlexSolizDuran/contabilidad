@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class GestionCuentaConfig(AppConfig):
+class GestionAsientosConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'contabilidad.apps.gestion_cuentas'
+    name = 'contabilidad.apps.gestion_asiento'
