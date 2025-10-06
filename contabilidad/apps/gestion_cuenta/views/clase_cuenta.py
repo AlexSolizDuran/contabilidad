@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from ..models.clase_cuenta import ClaseCuenta
-from ...configurar.models.empresa import UserEmpresa
+
 from ..serializers import (ClaseCuentaCreateSerializer,
                            ClaseCuentaDetailSerializer,
                            ClaseCuentaListSerializer)
@@ -20,15 +20,7 @@ class ClaseCuentaViewSet(viewsets.ModelViewSet):
         return super().get_serializer_class()
     
     def get_queryset(self):
-        print("entro al view")
-        user = self.request.user
-        if user.is_authenticated:
-            # Obtener la primera relación UserEmpresa del usuario
-            user_empresa = UserEmpresa.objects.filter(user=user).first()
-            
-            if user_empresa:
-                # Filtrar cuentas solo de esa empresa
-                return ClaseCuenta.objects.filter(id_empresa=user_empresa.empresa)
-        # Ninguna cuenta si no hay usuario autenticado o sin empresa asociada
-        return ClaseCuenta.objects.none()
+        request = self.request
+        empresa = request.auth.get('empresa')  # o request.user.empresa.id según tu login
+        return ClaseCuenta.objects.filter(empresa_id=empresa)
     

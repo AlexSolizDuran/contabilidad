@@ -1,6 +1,7 @@
 from django.db import models
 from .clase_cuenta import ClaseCuenta
-from ...configurar.models.empresa import Empresa
+from ...empresa.models.empresa import Empresa
+import uuid
 
 class Cuenta(models.Model):
     ESTADO_CHOICES = [
@@ -10,6 +11,9 @@ class Cuenta(models.Model):
     ]
     class Meta:
         db_table = "cuenta"
+        unique_together = ('codigo','empresa')
+        
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     codigo = models.PositiveBigIntegerField()
     nombre = models.CharField(max_length=100)
     estado = models.CharField(max_length=10 , choices=ESTADO_CHOICES, default='ACTIVO')
@@ -28,17 +32,21 @@ class Cuenta(models.Model):
     update_at = models.DateTimeField(auto_now=True)
     
     def save(self, *args, **kwargs):
-        if not self.clase_cuenta:
-            codigo_str = str(self.codigo)
-            
-            # Buscar la ClaseCuenta cuyo código sea prefijo del código de la cuenta
-            clase = ClaseCuenta.objects.filter(
-                codigo__in=[int(codigo_str[:i+1]) for i in range(len(codigo_str))]
-            ).order_by('-codigo').first()  # Tomar la más específica
-            
-            self.clase_cuenta = clase  # Puede ser None si no encuentra ninguna
+        codigo_str = str(self.codigo)
+
+        # Generar lista de posibles prefijos
+        posibles_codigos = [int(codigo_str[:i+1]) for i in range(len(codigo_str))]
+
+        # Buscar la ClaseCuenta más específica según prefijo y empresa
+        clase = ClaseCuenta.objects.filter(
+            codigo__in=posibles_codigos,
+            empresa=self.empresa
+        ).order_by('-codigo').first()
+
+        self.clase_cuenta = clase  # Puede ser None si no encuentra ninguna
 
         super().save(*args, **kwargs)
+
 
     def __str__(self):
         return self.codigo + " - " + self.nombre

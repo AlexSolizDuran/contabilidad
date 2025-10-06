@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from ..models.movimiento import Movimiento
+from ...gestion_cuenta.serializers import CuentaListSerializer
 from ...gestion_cuenta.models.cuenta import Cuenta
 from ...gestion_asiento.models.asiento_contable import AsientoContable
 
@@ -13,31 +14,23 @@ class MovimientoCreateSerializer(serializers.ModelSerializer):
     
         
 class MovimientoDetailSerializer(serializers.ModelSerializer):
+    cuenta = CuentaListSerializer()
     class Meta:
         model = Movimiento
-        field = ["id","referencia","cuenta","debe","haber","cuenta"]
-    
-    def get_cuenta(self,obj):
-        return{
-            "id" :obj.cuenta.id,
-            "cuenta" : obj.cuenta.codigo + " - " + obj.cuenta.nombre,
-        }  
+        field = ["id","referencia","cuenta","debe","haber"]
+
+        
         
 class MovimientoListSerializer(serializers.ModelSerializer):
+    cuenta = CuentaListSerializer()
     class Meta:
         model = Movimiento
-        field = ["id","referencia","cuenta","debe","haber","fecha","asiento_contable"]
-    def get_fecha(self, obj):
-        # devuelve el created_at en formato ISO o personalizado
-        return obj.asiento_contable.created_at.isoformat()  
-    def get_cuenta(self,obj):
-        return{
-            "id" :obj.cuenta.id,
-            "cuenta" : obj.cuenta.codigo + " - " + obj.cuenta.nombre,
-        }      
-        
+        field = ["id","referencia","cuenta","debe","haber","asiento_contable"]
+
+          
     def get_asiento_contable(self,obj):
         return {
             "id" : obj.asiento_contable.id,
-            "asiento_contable" : obj.asiento_contable.numero
+            "numero" : obj.asiento_contable.numero,
+            "fecha" : obj.asiento_contable.created_at.isoformat()
         }

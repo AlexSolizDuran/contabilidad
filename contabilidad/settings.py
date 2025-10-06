@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
+
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,7 +48,7 @@ INSTALLED_APPS = [
     'contabilidad.apps.gestion_asiento',
     'contabilidad.apps.gestion_cuenta',
     'contabilidad.apps.usuario',
-    'contabilidad.apps.configurar'
+    'contabilidad.apps.empresa'
 ]
 ## parte de djangoRestFramework
 REST_FRAMEWORK = {
@@ -101,7 +105,7 @@ WSGI_APPLICATION = 'contabilidad.wsgi.application'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-AUTH_USER_MODEL = "usuarios.User"
+AUTH_USER_MODEL = "usuario.User"
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -117,15 +121,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 #configurar para la base datos
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'contabilidad',
-        'USER': 'postgres',
-        'PASSWORD': 'si$2$CONTA',
-        'HOST': '/cloudsql/concise-rampart-472723-j0:southamerica-east1:contabilidad',
-        'PORT': '5432',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
     }
 }
 
@@ -136,7 +140,7 @@ DATABASES = {
         'NAME': BASE_DIR / "db.sqlite3",
     }
 }
-'''
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 

@@ -3,4 +3,4 @@ from .clase_cuenta import (ClaseCuentaCreateSerializer,
                            ClaseCuentaListSerializer)
 from .cuenta import (CuentaCreateSerializer,
                      CuentaDetailSeriliazer,
-                     ClaseCuentaListSerializer)
+                     CuentaListSerializer)

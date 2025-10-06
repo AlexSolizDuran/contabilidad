@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from ..models.cuenta import Cuenta
-from ...configurar.models.empresa import UserEmpresa
+from ...empresa.models.empresa import Empresa
 from .clase_cuenta import ClaseCuentaListSerializer
 
 class CuentaCreateSerializer(serializers.ModelSerializer):
@@ -10,16 +10,9 @@ class CuentaCreateSerializer(serializers.ModelSerializer):
         
     def create(self, validated_data):
         request = self.context.get("request")
-        if not request or not request.user.is_authenticated:
-            raise serializers.ValidationError("Usuario no autenticado")
-
-        # Obtener la empresa del usuario
-        user_empresa = UserEmpresa.objects.filter(user=request.user).first()
-        if not user_empresa:
-            raise serializers.ValidationError("El usuario no tiene empresa asociada")
-
-        # Asignar automáticamente la empresa
-        validated_data["id_empresa"] = user_empresa.empresa
+        empresa_id = request.auth['empresa']
+        empresa = Empresa.objects.get(id=empresa_id) 
+        validated_data["id_empresa"] = empresa
         return super().create(validated_data)        
     
 class CuentaDetailSeriliazer(serializers.ModelSerializer):
@@ -27,7 +20,7 @@ class CuentaDetailSeriliazer(serializers.ModelSerializer):
     
     class Meta:
         model = Cuenta
-        fields = ["id","codigo","nombre" , "estado","clase_cuenta","created_at" ]
+        fields = ["id","codigo","nombre" , "estado","clase_cuenta"]
         
 class CuentaListSerializer(serializers.ModelSerializer):
     class Meta:

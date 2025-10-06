@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from ..models.asiento_contable import AsientoContable
-from ...configurar.models.empresa import UserEmpresa
+from ...empresa.models import UserEmpresa
 from ..serializers import (AsientoContableCreateSerializer,
                            AsientoContableListSerializer,
                            AsientoContableDetailSerializer)
@@ -26,13 +26,11 @@ class AsientoContableViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
     
     def get_queryset(self):
-        user = self.request.user
-        if user.is_authenticated:
-            user_empresa = UserEmpresa.objects.filter(user=user).first()
-            if user_empresa:
+        empresa = self.request.auth.get('empresa')  # o request.user.empresa.id según tu login
+        if empresa:
                 # Filtra los asientos que tengan al menos un movimiento cuya cuenta sea de la empresa
-                return AsientoContable.objects.filter(
-                    movimientos__id_cuenta__id_empresa=user_empresa.empresa
-                ).distinct()
+            return AsientoContable.objects.filter(
+                movimientos__cuenta__empresa=empresa
+            ).distinct()
         return AsientoContable.objects.none()
 
