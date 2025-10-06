@@ -1,12 +1,16 @@
 from rest_framework import serializers
-from ..models import UserEmpresa
+from ..models import UserEmpresa,Custom
 from .rol import RolEmpresaListSerializer
 
-
+class CustomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Custom
+        fields = ['id','nombre', 'color_primario', 'color_secundario', 'color_terciario']
+        
 class UserEmpresaCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserEmpresa
-        fields = ['usuario', 'empresa']
+        fields = ['usuario','custom']
     
     def create(self, validated_data):
         request = self.context.get("request")
@@ -21,7 +25,7 @@ class UserEmpresaListSerializer(serializers.ModelSerializer):
 
 class UserEmpresaDetailSerializer(serializers.ModelSerializer):
     roles = RolEmpresaListSerializer(many=True, read_only=True)
-
+    custom = CustomSerializer(read_only=True)
     class Meta:
         model = UserEmpresa
-        fields = ['id','usuario','empresa','roles']
+        fields = ['id','usuario','empresa','roles','custom']

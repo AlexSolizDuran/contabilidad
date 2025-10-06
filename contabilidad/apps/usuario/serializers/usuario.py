@@ -24,5 +24,5 @@ class UsuarioDetailSerializer(serializers.ModelSerializer):
     persona = PersonaDetailSerializer()
     class Meta:
         model = User
-        fields = ['username','email','persona']
+        fields = ['id','username','email','persona']
 

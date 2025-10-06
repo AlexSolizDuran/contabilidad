@@ -5,4 +5,7 @@ class Permiso(models.Model):
     descripcion = models.TextField(blank=True, null=True)
     roles = models.ManyToManyField(RolEmpresa, related_name='permisos')
     
+    class Meta:
+        db_table = "permiso"
+
     

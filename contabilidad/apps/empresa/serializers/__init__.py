@@ -6,6 +6,9 @@ from .rol import (RolEmpresaCreateSerializer,
                   RolEmpresaDetailSerializer)
 from .user_empresa import (UserEmpresaCreateSerializer,
                            UserEmpresaListSerializer,
-                           UserEmpresaDetailSerializer)
+                           UserEmpresaDetailSerializer,CustomSerializer)
 from .permiso import PermisoSerializer,PermisoDetailSerializer
 from .login_empresa import LoginEmpresaSerializer
+from .custom import (CustomCreateSerializer,
+                     CustomDetailSerializer,
+                     CustomListSerializer)

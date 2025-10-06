@@ -2,7 +2,8 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from ..serializers import LoginSerializer, RegisterSerializer
+from ..serializers import LoginSerializer, RegisterSerializer,UsuarioDetailSerializer
+
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -15,20 +16,30 @@ class AuthViewSet(viewsets.ViewSet):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-
+        
         if user:
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
             refresh_token = str(refresh)
+            nombre = user.persona.nombre
+            apellido = user.persona.apellido
+            email = user.email
+            username = user.username
 
-            response = Response({'access': access_token}, status=status.HTTP_200_OK)
+            response = Response(
+                {'access': access_token,
+                 'username': username,
+                 'nombre': nombre,
+                 'apellido': apellido,
+                 'email': email
+                },status=status.HTTP_200_OK)
             response.set_cookie(
-                key='refreshToken',
-                value=refresh_token,
+                key='sessionToken',
+                value=access_token,
                 httponly=True,
                 secure=True,
                 samesite='Strict',
-                max_age=7*24*60*60
+                max_age=60*60*24 
             )
             return response
 

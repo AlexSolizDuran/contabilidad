@@ -21,7 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('contabilidad.apps.gestion_cuenta.urls')),
     path('',include('contabilidad.apps.gestion_asiento.urls')),
-    path('auth/',include('contabilidad.apps.usuario.urls')),
+    path('',include('contabilidad.apps.usuario.urls')),
     path('',include('contabilidad.apps.empresa.urls')),
     
 ]
