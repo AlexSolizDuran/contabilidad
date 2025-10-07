@@ -12,7 +12,7 @@ class CuentaCreateSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         empresa_id = request.auth['empresa']
         empresa = Empresa.objects.get(id=empresa_id) 
-        validated_data["id_empresa"] = empresa
+        validated_data["empresa"] = empresa
         return super().create(validated_data)        
     
 class CuentaDetailSeriliazer(serializers.ModelSerializer):

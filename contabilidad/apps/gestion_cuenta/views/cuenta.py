@@ -2,6 +2,9 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from django.db.models.functions import Cast, Substr
+from django.db.models import CharField
+
 
 from ..models.cuenta import Cuenta
 from ...gestion_asiento.models import Movimiento
@@ -16,6 +19,7 @@ class CuentaViewSet(viewsets.ModelViewSet):
     queryset = Cuenta.objects.all()
     serializer_class = CuentaListSerializer
     permission_classes = [IsAuthenticated]
+    
     def get_serializer_class(self):
         if self.action == 'list':
             return CuentaListSerializer
@@ -24,10 +28,21 @@ class CuentaViewSet(viewsets.ModelViewSet):
         elif self.action in ['retrieve','destroy']:
             return CuentaDetailSeriliazer
         return super().get_serializer_class()
+    
     def get_queryset(self):
         request = self.request
-        empresa = request.auth.get('empresa')  # o request.user.empresa.id según tu login
-        return Cuenta.objects.filter(empresa_id=empresa)
+        empresa_id = request.auth.get('empresa')  # o request.user.empresa.id según tu login
+
+        # Filtrar por empresa
+        qs = Cuenta.objects.filter(empresa_id=empresa_id)
+
+        # Convertimos codigo a char, luego extraemos el primer dígito y ordenamos
+        qs = qs.annotate(
+            codigo_str=Cast('codigo', CharField()),      # convierte a texto
+            primer_digito=Substr('codigo_str', 1, 1)    # extrae primer dígito
+        ).order_by('primer_digito', 'codigo')           # ordena por primer dígito y luego por código completo
+
+        return qs
     
     @action(detail=True, methods=['get'])
     def movimientos(self, request, pk=None):

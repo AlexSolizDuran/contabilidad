@@ -26,11 +26,7 @@ class AsientoContableViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
     
     def get_queryset(self):
-        empresa = self.request.auth.get('empresa')  # o request.user.empresa.id según tu login
-        if empresa:
-                # Filtra los asientos que tengan al menos un movimiento cuya cuenta sea de la empresa
-            return AsientoContable.objects.filter(
-                movimientos__cuenta__empresa=empresa
-            ).distinct()
-        return AsientoContable.objects.none()
+        request = self.request
+        empresa = request.auth.get('empresa')  # o request.user.empresa.id según tu login
+        return AsientoContable.objects.filter(empresa_id=empresa)
 

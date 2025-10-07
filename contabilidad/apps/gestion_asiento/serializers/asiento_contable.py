@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from django.db.models import Max
-from django.db import transaction
+
 from ..models import AsientoContable,Movimiento
 from ...empresa.models import Empresa
 from .movimiento import MovimientoCreateSerializer,MovimientoDetailSerializer
@@ -11,28 +10,24 @@ class AsientoContableCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = AsientoContable
         fields = ["numero", "descripcion", "estado", "movimientos"]
-        read_only_fields = ["numero"]  # numero se genera automáticamente
+        read_only_fields = ["numero"]  # numero generado automáticamente en el modelo
 
     def create(self, validated_data):
+        print("llego aqui" , validated_data)
         movimientos_data = validated_data.pop('movimientos', [])
-
+        
         # Obtener la empresa desde el request
         request = self.context.get("request")
         empresa_id = request.auth['empresa']  # asumiendo que el token trae id de empresa
         empresa = Empresa.objects.get(id=empresa_id)
         validated_data["empresa"] = empresa
 
-        # Generar numero automáticamente por empresa
-        with transaction.atomic():
-            ultimo_numero = AsientoContable.objects.filter(empresa=empresa).aggregate(
-                Max('numero')
-            )['numero__max'] or 0
-            validated_data['numero'] = ultimo_numero + 1
+        # Crear el asiento; el número se generará automáticamente en el modelo
+        asiento = AsientoContable.objects.create(**validated_data)
 
-            asiento = AsientoContable.objects.create(**validated_data)
-
-            for mov_data in movimientos_data:
-                Movimiento.objects.create(asiento=asiento, **mov_data)
+        # Crear los movimientos relacionados
+        for mov_data in movimientos_data:
+            Movimiento.objects.create(asiento_contable=asiento, **mov_data)
 
         return asiento
 
@@ -42,21 +37,32 @@ class AsientoContableCreateSerializer(serializers.ModelSerializer):
         instance.estado = validated_data.get('estado', instance.estado)
         instance.save()
 
-        # Eliminamos los movimientos antiguos y creamos los nuevos
+        # Reemplazar movimientos antiguos con los nuevos
         instance.movimientos.all().delete()
         for mov_data in movimientos_data:
-            Movimiento.objects.create(asiento=instance, **mov_data)
+            Movimiento.objects.create(asiento_contable=instance, **mov_data)
 
         return instance
 
+
 class AsientoContableDetailSerializer(serializers.ModelSerializer):
     movimientos = MovimientoDetailSerializer(many=True, read_only=True)
-
+    fecha = serializers.SerializerMethodField()
     class Meta:
         model = AsientoContable
-        fields = ["id","descripcion", "numero","estado", "movimientos","created_at"]
+        fields = ["id","descripcion", "numero","estado", "movimientos","fecha"]
+        
+    def get_fecha(self,obj):
+        return obj.created_at.isoformat()
+
 
 class AsientoContableListSerializer(serializers.ModelSerializer):
+    fecha = serializers.SerializerMethodField()
+
     class Meta:
         model = AsientoContable
-        fields = ["id","numero","descripcion","estado"]
+        fields = ["id", "numero", "descripcion", "estado", "fecha"]
+
+    def get_fecha(self, obj):
+        # Si tu modelo tiene un campo created_at tipo DateTimeField:
+        return obj.created_at.isoformat() if obj.created_at else None

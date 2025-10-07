@@ -4,8 +4,8 @@ import uuid
 
 class ClaseCuenta(models.Model):
     class Meta:
-        
         db_table ="clase_cuenta"
+        unique_together = ('codigo','empresa')
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField(max_length=100)

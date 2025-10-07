@@ -1,4 +1,5 @@
-from rest_framework import viewsets, status, permissions
+from rest_framework import viewsets, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -10,20 +11,22 @@ from ...usuario.serializers import UsuarioDetailSerializer
 
 
 class AuthViewSet(viewsets.ViewSet):
-    permission_classes = [permissions.IsAuthenticated]  # usuario ya logeado
+      # usuario ya logeado
+    permission_classes = [IsAuthenticated]
 
     @action(detail=False, methods=['post'])
     def login_empresa(self, request):
+        print(request.data)
         serializer = LoginEmpresaSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         user_empresa = serializer.validated_data['user_empresa']
-        user = user_empresa.usuario
+        user_obj = user_empresa.usuario
         empresa = user_empresa.empresa  
         custom = CustomDetailSerializer(user_empresa.custom).data
-        user = UsuarioDetailSerializer(user).data
+        user = UsuarioDetailSerializer(user_obj).data
         roles = user_empresa.roles.values_list('nombre', flat=True)
-        refresh = RefreshToken.for_user(user)
+        refresh = RefreshToken.for_user(user_obj)
 
         refresh['empresa'] = str(empresa.id)  # ✅ Guardamos la empresa en el token
 

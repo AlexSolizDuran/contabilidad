@@ -1,5 +1,7 @@
 from django.db import models
 from ...empresa.models import Empresa
+from django.db.models import Max
+from django.db import transaction
 import uuid
 
 class AsientoContable(models.Model):
@@ -10,11 +12,27 @@ class AsientoContable(models.Model):
     ]
     class Meta:
         db_table = "asiento_contable"
+        unique_together = ('numero','empresa')
         
     id = models.UUIDField(primary_key=True,editable=False,default=uuid.uuid4)
-    numero = models.PositiveIntegerField()
+    numero = models.PositiveIntegerField(blank=True,null=True)
     descripcion = models.CharField(max_length=100)
     empresa = models.ForeignKey(Empresa,on_delete=models.CASCADE,related_name='asientos')
     estado = models.CharField(max_length=10,choices=ESTADO_CHOICES,default='BORRADOR')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        # Solo asignar numero si es un registro nuevo
+        if not self.numero:
+            with transaction.atomic():
+                # Bloquear los registros de la empresa para evitar duplicados
+                ultimo_numero = (
+                    AsientoContable.objects
+                    .select_for_update()
+                    .filter(empresa=self.empresa)
+                    .aggregate(Max('numero'))['numero__max'] or 0
+                )
+                self.numero = ultimo_numero + 1
+
+        super().save(*args, **kwargs)
