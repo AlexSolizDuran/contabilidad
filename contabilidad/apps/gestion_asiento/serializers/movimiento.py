@@ -23,14 +23,19 @@ class MovimientoDetailSerializer(serializers.ModelSerializer):
         
 class MovimientoListSerializer(serializers.ModelSerializer):
     cuenta = CuentaListSerializer()
+    asiento = serializers.SerializerMethodField()  # <-- solo para lista
+
     class Meta:
         model = Movimiento
-        field = ["id","referencia","cuenta","debe","haber","asiento_contable"]
+        fields = ["id", "referencia", "cuenta", "debe", "haber", "asiento"]
 
-          
-    def get_asiento_contable(self,obj):
-        return {
-            "id" : obj.asiento_contable.id,
-            "numero" : obj.asiento_contable.numero,
-            "fecha" : obj.asiento_contable.created_at.isoformat()
-        }
+    def get_asiento(self, obj):
+        # Devuelve solo los campos que quieras del asiento contable
+        if obj.asiento_contable:
+            return {
+                "id": obj.asiento_contable.id,
+                "numero": obj.asiento_contable.numero,
+                "fecha": obj.asiento_contable.created_at.isoformat(),
+                "estado": obj.asiento_contable.estado,
+            }
+        return None

@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from ..models.movimiento import Movimiento
-
+from rest_framework import filters
 from ...gestion_cuenta.models.cuenta import Cuenta
 from ..serializers import (MovimientoCreateSerializer,
                            MovimientoDetailSerializer,
@@ -12,6 +12,10 @@ class MovimientoViewSet(viewsets.ModelViewSet):
     queryset = Movimiento.objects.all()
     serializer_class = MovimientoListSerializer
     permission_classes = [IsAuthenticated]
+    
+    filter_backends = [filters.OrderingFilter]
+    ordering_fields = ['asiento_contable__numero', 'asiento_contable__created_at']
+    ordering = ['asiento_contable__numero']
     
     def get_serializer_class(self):
         if self.action == 'list':

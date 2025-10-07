@@ -26,6 +26,12 @@ class ClaseCuentaDetailSerializer(serializers.ModelSerializer):
         return None
         
 class ClaseCuentaListSerializer(serializers.ModelSerializer):
+    padre = serializers.SerializerMethodField()
     class Meta:
         model = ClaseCuenta
-        fields = ["id" , "codigo" , "nombre"]
+        fields = ["id" , "codigo" , "nombre","padre"]
+    def get_padre(self, obj):
+        
+        if obj.padre:
+            return ClaseCuentaDetailSerializer(obj.padre).data 
+        return None
