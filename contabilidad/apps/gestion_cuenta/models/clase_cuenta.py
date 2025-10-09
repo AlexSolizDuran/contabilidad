@@ -33,14 +33,18 @@ class ClaseCuenta(models.Model):
         for i in range(len(codigo_str), 0, -1):
             prefijo = int(codigo_str[:i])
             try:
-                clase_seleccionada = ClaseCuenta.objects.get(codigo=prefijo, empresa=self.empresa)
-                break  # se encontró la clase más específica
+                candidata = ClaseCuenta.objects.get(codigo=prefijo, empresa=self.empresa)
+                # Evitar asignarse a sí misma
+                if candidata != self:
+                    clase_seleccionada = candidata
+                    break
             except ClaseCuenta.DoesNotExist:
                 continue
 
         self.padre = clase_seleccionada
 
         super().save(*args, **kwargs)
+
 
     def get_descendientes_ids(self):
         """

@@ -10,13 +10,13 @@ class CustomSerializer(serializers.ModelSerializer):
         fields = ['id','nombre', 'color_primario', 'color_secundario', 'color_terciario']
         
 class UserEmpresaCreateSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(write_only=True)  # nuevo campo para recibir el correo
+    email = serializers.EmailField(write_only=True,required=False)  # nuevo campo para recibir el correo
 
     class Meta:
         model = UserEmpresa
         fields = ['email', 'custom']  # usuario se obtiene del gmail, empresa se asigna automáticamente
 
-    def validate_gmail(self, value):
+    def validate_email(self, value):
         """Validar que el usuario exista"""
         try:
             usuario = User.objects.get(email=value)
