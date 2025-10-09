@@ -18,3 +18,10 @@ class UserEmpresaViewSet(viewsets.ModelViewSet):
             return UserEmpresaDetailSerializer
         return super().get_serializer_class()
     
+    def get_queryset(self):
+        request = self.request
+        empresa = request.auth.get('empresa')
+
+        return UserEmpresa.objects.filter(empresa=empresa) \
+        .exclude(roles__nombre='admin') \
+        .distinct()

@@ -20,8 +20,9 @@ class RolEmpresaViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         request = self.request
-        empresa = request.auth.get('empresa')  # o request.user.empresa.id según tu login
-        return RolEmpresa.objects.filter(empresa_id=empresa)
+        empresa = request.auth.get('empresa')
+        # o request.user.empresa.id según tu login
+        return RolEmpresa.objects.filter(empresa_id=empresa).exclude(nombre='admin')
     
     @action(detail=True, methods=['post'])
     def set_usuarios(self, request, pk=None):
