@@ -6,7 +6,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from ..serializers import LoginEmpresaSerializer
 from ...empresa.serializers import CustomDetailSerializer
 from ...usuario.serializers import UsuarioDetailSerializer
-
+from ..serializers import   UserEmpresaDetailSerializer
 
 
 
@@ -21,18 +21,16 @@ class AuthViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
 
         user_empresa = serializer.validated_data['user_empresa']
+        ue = user_empresa
         user_obj = user_empresa.usuario
         empresa = user_empresa.empresa  
         custom = CustomDetailSerializer(user_empresa.custom).data
         user = UsuarioDetailSerializer(user_obj).data
         roles = user_empresa.roles.values_list('nombre', flat=True)
-        refresh = RefreshToken.for_user(user_obj)
-
+        refresh = RefreshToken.for_user(user_obj)   
         refresh['empresa'] = str(empresa.id)  # ✅ Guardamos la empresa en el token
-
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
-
         # --- Respuesta con cookies y access token ---
         response = Response({'access': access_token,
                              'empresa': empresa.id,

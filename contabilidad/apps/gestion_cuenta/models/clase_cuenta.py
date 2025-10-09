@@ -42,6 +42,13 @@ class ClaseCuenta(models.Model):
 
         super().save(*args, **kwargs)
 
-    
+    def get_descendientes_ids(self):
+        """
+        Devuelve una lista con los IDs de esta clase y todas sus subclases recursivamente
+        """
+        ids = [self.id]
+        for hijo in self.hijos.all():
+            ids.extend(hijo.get_descendientes_ids())
+        return ids
     def __str__(self):
         return self.codigo + " - " + self.nombre

@@ -25,7 +25,7 @@ class CuentaDetailSeriliazer(serializers.ModelSerializer):
 class CuentaListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cuenta
-        fields = ["id","codigo","nombre" ]
+        fields = ["id","codigo","nombre","estado" ]
         
 
     

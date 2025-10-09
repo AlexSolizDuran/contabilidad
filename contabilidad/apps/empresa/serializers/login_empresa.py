@@ -14,5 +14,6 @@ class LoginEmpresaSerializer(serializers.Serializer):
             raise serializers.ValidationError("El usuario no pertenece a esta empresa")
 
         # Guardamos el objeto completo en validated_data para usarlo en la vista
+        
         data['user_empresa'] = user_empresa
         return data

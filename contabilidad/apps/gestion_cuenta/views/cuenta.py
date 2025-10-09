@@ -6,7 +6,7 @@ from django.db.models.functions import Cast, Substr
 from django.db.models import CharField
 
 
-from ..models.cuenta import Cuenta
+from ..models import Cuenta,ClaseCuenta
 from ...gestion_asiento.models import Movimiento
 from ...gestion_asiento.serializers import MovimientoListSerializer
 from ..serializers.cuenta import (CuentaCreateSerializer,
@@ -35,6 +35,17 @@ class CuentaViewSet(viewsets.ModelViewSet):
 
         # Filtrar por empresa
         qs = Cuenta.objects.filter(empresa_id=empresa_id)
+
+        # Filtrar por clase seleccionada si se pasa por query params
+        clase_id = request.query_params.get('clase_id')
+        if clase_id:
+            try:
+                clase = ClaseCuenta.objects.get(id=clase_id, empresa_id=empresa_id)
+                # Obtener IDs de todos los descendientes
+                descendientes_ids = clase.get_descendientes_ids()
+                qs = qs.filter(clase_cuenta_id__in=descendientes_ids)
+            except ClaseCuenta.DoesNotExist:
+                qs = qs.none()
 
         # Convertimos codigo a char, luego extraemos el primer dígito y ordenamos
         qs = qs.annotate(

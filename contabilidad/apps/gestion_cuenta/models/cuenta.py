@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import ValidationError
 from .clase_cuenta import ClaseCuenta
 from ...empresa.models.empresa import Empresa
 import uuid
@@ -32,12 +33,16 @@ class Cuenta(models.Model):
     update_at = models.DateTimeField(auto_now=True)
     
     def save(self, *args, **kwargs):
+        # 1️⃣ Validar unicidad por código y empresa
+        if Cuenta.objects.filter(codigo=self.codigo, empresa=self.empresa).exclude(pk=self.pk).exists():
+            raise ValidationError({
+                "codigo": "Ya existe una cuenta con este código en la empresa."
+            })
+
+        # 2️⃣ Asignar clase_cuenta automáticamente según prefijo (usar strings para no perder ceros)
         codigo_str = str(self.codigo)
+        posibles_codigos = [codigo_str[:i+1] for i in range(len(codigo_str))]
 
-        # Generar lista de posibles prefijos
-        posibles_codigos = [int(codigo_str[:i+1]) for i in range(len(codigo_str))]
-
-        # Buscar la ClaseCuenta más específica según prefijo y empresa
         clase = ClaseCuenta.objects.filter(
             codigo__in=posibles_codigos,
             empresa=self.empresa
@@ -45,7 +50,17 @@ class Cuenta(models.Model):
 
         self.clase_cuenta = clase  # Puede ser None si no encuentra ninguna
 
-        super().save(*args, **kwargs)
+        # 3️⃣ Guardar usando super
+        try:
+            super().save(*args, **kwargs)
+        except ValidationError:
+            # Re-lanzar errores de validación de manera que DRF los capture
+            raise
+        except Exception as e:
+            # Captura cualquier otro error inesperado
+            raise ValidationError({
+                "detail": f"Ocurrió un error al guardar la cuenta: {str(e)}"
+            })
 
 
     

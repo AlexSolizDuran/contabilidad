@@ -1,6 +1,7 @@
 from .clase_cuenta import (ClaseCuentaCreateSerializer,
                            ClaseCuentaDetailSerializer,
-                           ClaseCuentaListSerializer)
+                           ClaseCuentaListSerializer,
+                           ClaseCuentaDetailChildrenSerializer)
 from .cuenta import (CuentaCreateSerializer,
                      CuentaDetailSeriliazer,
                      CuentaListSerializer)

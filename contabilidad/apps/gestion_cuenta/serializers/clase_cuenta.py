@@ -35,3 +35,17 @@ class ClaseCuentaListSerializer(serializers.ModelSerializer):
         if obj.padre:
             return ClaseCuentaDetailSerializer(obj.padre).data 
         return None
+    
+
+class ClaseCuentaDetailChildrenSerializer(serializers.ModelSerializer):
+    hijos = serializers.SerializerMethodField()
+    class Meta:
+        model = ClaseCuenta
+        fields = ["id" , "codigo" , "nombre","hijos"]
+    
+    def get_hijos(self, obj):
+        # Obtenemos los hijos del objeto actual
+        hijos_qs = obj.hijos.all()  # gracias a related_name="hijos"
+        # Serializamos los hijos recursivamente
+        serializer = ClaseCuentaDetailChildrenSerializer(hijos_qs, many=True)
+        return serializer.data    

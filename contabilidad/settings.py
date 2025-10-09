@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'contabilidad.apps.usuario',
     'contabilidad.apps.empresa',
     'contabilidad.apps.reporte',
+    'contabilidad.apps.plantilla'
 ]
 ## parte de djangoRestFramework
 REST_FRAMEWORK = {
