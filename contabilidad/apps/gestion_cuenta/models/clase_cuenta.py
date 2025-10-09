@@ -27,7 +27,7 @@ class ClaseCuenta(models.Model):
     
     def save(self, *args, **kwargs):
         codigo_str = str(self.codigo)
-        clase_seleccionada = None
+        clase_seleccionada = None   
 
         # Buscamos la clase más específica por prefijo, filtrando por empresa
         for i in range(len(codigo_str), 0, -1):
