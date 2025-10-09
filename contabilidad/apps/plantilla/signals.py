@@ -1,15 +1,15 @@
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
-from django.apps import apps
+from django.core.management import call_command
 
 @receiver(post_migrate)
 def ejecutar_seeders(sender, **kwargs):
-    if sender.name != "contabilidad.apps.plantilla":  # Solo correr para tu app específica
+    if sender.name != "contabilidad.apps.plantilla":
         return
 
     try:
-        from contabilidad.apps.plantilla.seeds import seed_permiso
-        seed_permiso.run()
-        print("✅ Seeders ejecutados correctamente después de migrate")
+        print("▶ Ejecutando comando seed_all después de migrate...")
+        call_command("seed_all")
+        print("✅ Seed_all ejecutado correctamente después de migrate")
     except Exception as e:
-        print(f"❌ Error ejecutando seeders: {e}")
+        print(f"❌ Error ejecutando seed_all: {e}")

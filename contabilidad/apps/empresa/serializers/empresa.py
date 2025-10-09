@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import Empresa,RolEmpresa,UserEmpresa
+from ..models import Empresa,RolEmpresa,UserEmpresa,Custom
 
 from .user_empresa import UserEmpresaListSerializer
 
@@ -13,7 +13,8 @@ class EmpresaCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         usuario = self.context['request'].user
         empresa = Empresa.objects.create(**validated_data)
-        user_empresa = UserEmpresa.objects.create(usuario=usuario, empresa=empresa)
+        custom = Custom.objects.get(nombre='verde')
+        user_empresa = UserEmpresa.objects.create(usuario=usuario, empresa=empresa,custom=custom)
         rol = RolEmpresa.objects.create(nombre='admin', empresa=empresa)
         user_empresa.roles.add(rol)
         return empresa
