@@ -3,19 +3,18 @@ from ...usuario.models import User, Persona
 def run():
     usuarios_data = [
         {
-            "username": "admin",
-            "email": "admin@empresa.com",
-            "password": "admin123",
-            "is_staff": True,
+            "username": "user1",
+            "email": "user1@gmail.com",
+            "password": "123456",
             "nombre": "Admin",
             "apellido": "Principal",
             "ci": "123456",
             "telefono": "77777777"
         },
         {
-            "username": "juanp",
-            "email": "juanp@empresa.com",
-            "password": "usuario123",
+            "username": "user2",
+            "email": "user2@gmail.com",
+            "password": "123456",
             "nombre": "Juan",
             "apellido": "Perez",
             "ci": "987654",

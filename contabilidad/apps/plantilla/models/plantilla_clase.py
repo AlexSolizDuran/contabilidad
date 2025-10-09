@@ -18,14 +18,17 @@ class PlantillaClase(models.Model):
     
     def save(self, *args, **kwargs):
         codigo_str = str(self.codigo)
-        clase_seleccionada = None
+        clase_seleccionada = None   
 
         # Buscamos la clase más específica por prefijo, filtrando por empresa
         for i in range(len(codigo_str), 0, -1):
             prefijo = int(codigo_str[:i])
             try:
-                clase_seleccionada = PlantillaClase.objects.get(codigo=prefijo)
-                break  # se encontró la clase más específica
+                candidata = PlantillaClase.objects.get(codigo=prefijo)
+                # Evitar asignarse a sí misma
+                if candidata != self:
+                    clase_seleccionada = candidata
+                    break
             except PlantillaClase.DoesNotExist:
                 continue
 
