@@ -24,14 +24,14 @@ def run():
 
     for data in usuarios_data:
         # 1️⃣ Crear Persona
-        persona = Persona.objects.get_or_create(
-            ci=data.get("ci"),
-            defaults={
-                "nombre": data["nombre"],
-                "apellido": data["apellido"],
-                "telefono": data.get("telefono")
-            }
-        )
+        persona, _ = Persona.objects.get_or_create(
+        ci=data.get("ci"),
+        defaults={
+            "nombre": data["nombre"],
+            "apellido": data["apellido"],
+            "telefono": data.get("telefono")
+        }
+    )
 
         # 2️⃣ Crear User asociado a la persona
         user, created_user = User.objects.get_or_create(
