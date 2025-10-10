@@ -53,7 +53,7 @@ class AsientoContableDetailSerializer(serializers.ModelSerializer):
         fields = ["id","descripcion", "numero","estado", "movimientos","fecha"]
         
     def get_fecha(self,obj):
-        return obj.created_at.isoformat()
+        return obj.created_at.date().isoformat()
 
 
 class AsientoContableListSerializer(serializers.ModelSerializer):
@@ -65,4 +65,4 @@ class AsientoContableListSerializer(serializers.ModelSerializer):
 
     def get_fecha(self, obj):
         # Si tu modelo tiene un campo created_at tipo DateTimeField:
-        return obj.created_at.isoformat() if obj.created_at else None
+        return obj.created_at.date().isoformat()
