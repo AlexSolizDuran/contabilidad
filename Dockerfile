@@ -25,4 +25,4 @@ COPY . /app
 EXPOSE 8080
 
 # Comando para arrancar Django con Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "contabilidad.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "contabilidad.wsgi:application", "--timeout", "120"]
