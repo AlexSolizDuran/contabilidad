@@ -125,7 +125,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 #configurar para la base datos
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -144,6 +144,7 @@ DATABASES = {
         'NAME': BASE_DIR / "db.sqlite3",
     }
 }
+'''
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
