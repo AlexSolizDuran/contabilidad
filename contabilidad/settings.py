@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-mf&$v2m+id9iphtz1w2ap*@2nv93eomfv$2ajtwjti_8eurz*a
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -171,8 +171,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://contabilidad-1.onrender.com",
-    "http://localhost:3000",
-    "https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
-    "https://next-conta.vercel.app",
+    #"https://contabilidad-1.onrender.com",
+    #"http://localhost:3000",
+    #"https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
+    #"https://next-conta.vercel.app",
+    https://contafrontoficial-393159630636.northamerica-south1.run.app
 ]
+CORS_ALLOW_CREDENTIALS = True
