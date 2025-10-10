@@ -21,3 +21,4 @@ class LibroDiarioSerializer(serializers.ModelSerializer):
             'codigo' : obj.cuenta.codigo,
             'nombre' : obj.cuenta.nombre,
         }
+        
