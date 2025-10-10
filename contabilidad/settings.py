@@ -169,9 +169,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ALLOWED_HOSTS = ["*"]
 
-CORS_ALLOWED_ORIGINS = [
-    "https://contabilidad-1.onrender.com",
-    "http://localhost:3000",
-    "https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
-    "https://next-conta.vercel.app",
-]
+CORS_ALLOW_CREDENTIALS = True
