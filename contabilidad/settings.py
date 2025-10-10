@@ -175,6 +175,6 @@ CORS_ALLOWED_ORIGINS = [
     #"http://localhost:3000",
     #"https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
     #"https://next-conta.vercel.app",
-    https://contafrontoficial-393159630636.northamerica-south1.run.app
+    "https://contafrontoficial-393159630636.northamerica-south1.run.app"
 ]
 CORS_ALLOW_CREDENTIALS = True
