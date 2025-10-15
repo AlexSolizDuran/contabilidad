@@ -4,3 +4,4 @@ from .permiso import PermisoViewSet
 from .rol import RolEmpresaViewSet
 from .user_empresa import UserEmpresaViewSet
 from .login_empresa import AuthViewSet
+from .favorito import FavoritoAPIView

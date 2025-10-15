@@ -177,4 +177,3 @@ CORS_ALLOWED_ORIGINS = [
     #"https://next-conta.vercel.app",
     "https://contafrontoficial-393159630636.northamerica-south1.run.app"
 ]
-CORS_ALLOW_CREDENTIALS = True

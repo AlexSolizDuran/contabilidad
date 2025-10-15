@@ -5,7 +5,8 @@ from .views import (EmpresaViewSet,
                     PermisoViewSet,
                     RolEmpresaViewSet,
                     UserEmpresaViewSet,
-                    AuthViewSet)
+                    AuthViewSet,
+                    FavoritoAPIView)
 
 router = routers.DefaultRouter()
 router.register(r'empresa', EmpresaViewSet, basename='empresa')
@@ -17,5 +18,8 @@ router.register(r'auth_empresa', AuthViewSet, basename='auth_empresa')
 
 
 urlpatterns = [
+    path('favorito/', FavoritoAPIView.as_view(), name='favorito'),
+    path('favorito/<int:pk>/', FavoritoAPIView.as_view(), name='favorito-detalle'),
+
     path('', include(router.urls)),
 ]
