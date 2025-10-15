@@ -169,7 +169,7 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
-
+#15/10/2025
 CORS_ALLOWED_ORIGINS = [
     #"https://contabilidad-1.onrender.com",
     #"http://localhost:3000",
