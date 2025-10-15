@@ -8,6 +8,8 @@ class UserEmpresa(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
     custom = models.ForeignKey(Custom, on_delete=models.SET_NULL, null=True, blank=True)
+    texto_tipo = models.CharField(max_length=50, null=True, blank=True)
+    texto_tamaño = models.CharField(max_length=50, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)  
     class Meta:

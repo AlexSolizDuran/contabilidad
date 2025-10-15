@@ -12,3 +12,5 @@ from .login_empresa import LoginEmpresaSerializer
 from .custom import (CustomCreateSerializer,
                      CustomDetailSerializer,
                      CustomListSerializer)
+from .favorito import (FavoritoCreateSerializer,
+                       FavoritoListSerializer)

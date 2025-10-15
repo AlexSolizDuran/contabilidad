@@ -28,6 +28,7 @@ class AuthViewSet(viewsets.ViewSet):
 
             response = Response(
                 {'access': access_token,
+                'user_id':user.id,
                  'username': username,
                  'nombre': nombre,
                  'apellido': apellido,

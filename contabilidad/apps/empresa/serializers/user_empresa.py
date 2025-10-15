@@ -11,10 +11,14 @@ class CustomSerializer(serializers.ModelSerializer):
         
 class UserEmpresaCreateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(write_only=True,required=False)  # nuevo campo para recibir el correo
+    texto_tipo = serializers.CharField(required=False)
+    texto_tamaño = serializers.CharField(required=False)
+    custom = serializers.PrimaryKeyRelatedField(queryset=Custom.objects.all(), required=False)
 
+    
     class Meta:
         model = UserEmpresa
-        fields = ['email', 'custom']  # usuario se obtiene del gmail, empresa se asigna automáticamente
+        fields = ['email', 'custom', 'texto_tipo', 'texto_tamaño']  # usuario se obtiene del gmail, empresa se asigna automáticamente
 
     def validate_email(self, value):
         """Validar que el usuario exista"""
@@ -27,8 +31,9 @@ class UserEmpresaCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         request = self.context.get("request")
         empresa_id = request.auth['empresa']  # obtienes la empresa del token/auth
-        email = validated_data.pop('email')  # es el objeto User retornado en validate_gmail
-        usuario = User.objects.get(email=email)
+        user = validated_data.pop('email')  # es el objeto User retornado en validate_gmail
+        
+        usuario = User.objects.get(username=user)
 
         # Verificar si ya existe la relación
         from ..models import Empresa
@@ -53,4 +58,4 @@ class UserEmpresaDetailSerializer(serializers.ModelSerializer):
     custom = CustomSerializer(read_only=True)
     class Meta:
         model = UserEmpresa
-        fields = ['id','usuario','empresa','roles','custom']
+        fields = ['id','usuario','empresa','roles','custom','texto_tipo','texto_tamaño']

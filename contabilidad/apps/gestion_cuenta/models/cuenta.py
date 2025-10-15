@@ -34,6 +34,7 @@ class Cuenta(models.Model):
     
     def save(self, *args, **kwargs):
         # 1️⃣ Validar unicidad por código y empresa
+        print("si entro al modelo")
         if Cuenta.objects.filter(codigo=self.codigo, empresa=self.empresa).exclude(pk=self.pk).exists():
             raise ValidationError({
                 "codigo": "Ya existe una cuenta con este código en la empresa."

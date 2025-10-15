@@ -10,9 +10,9 @@ class UsuarioViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return UsuarioListSerializer
-        elif self.action == ['create','update','partial_update']:
+        elif self.action in ['create','update','partial_update']:
             return UsuarioDetailSerializer
-        elif self.action == ['retrieve','destroy']:
+        elif self.action in ['retrieve','destroy']:
             return UsuarioDetailSerializer
         return super().get_serializer_class()
 
