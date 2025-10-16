@@ -1,2 +1,2 @@
 from .usuario import UsuarioViewSet
-from .auth import AuthViewSet
+from .auth import LoginView, LogoutView, RefreshView, RegisterView

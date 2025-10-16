@@ -6,7 +6,7 @@ from ..serializers import LibroMayorSerializer
 from ...gestion_cuenta.models import Cuenta,ClaseCuenta
 
 
-class LibroMayorViewSet(viewsets.ModelViewSet):
+class LibroMayorViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = LibroMayorSerializer
     permission_classes = [IsAuthenticated]
     def get_queryset(self):
