@@ -26,13 +26,14 @@ class LoginView(generics.GenericAPIView):
             apellido = user.persona.apellido
             email = user.email
             username = user.username
-
+            print(user.is_staff)
             response = Response(
                 {
                     'access': access_token,
                     'user_id': user.id,
                     'username': username,
                     'nombre': nombre,
+                    'superuser' : user.is_staff,
                     'apellido': apellido,
                     'email': email
                 },

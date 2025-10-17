@@ -15,4 +15,5 @@ urlpatterns = [
     path('auth/logout/', LogoutView.as_view(), name='auth-logout'),
     path('auth/refresh/', RefreshView.as_view(), name='auth-refresh'),
     path('auth/register/', RegisterView.as_view(), name='auth-register'),
+    path('', include(router.urls)),
 ]
