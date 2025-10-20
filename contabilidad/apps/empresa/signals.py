@@ -28,6 +28,7 @@ def crear_clases_por_defecto(sender, instance, created, **kwargs):
             # Guardamos la relación temporal
             plantilla_a_cuenta[plantilla.id] = cuenta
 
+@receiver(post_save, sender=Empresa)
 def crear_rol_por_defecto(sender, instance, created, **kwargs):
     if created:
         plantilla_rol = {}

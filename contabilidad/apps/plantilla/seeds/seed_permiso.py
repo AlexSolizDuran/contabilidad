@@ -27,7 +27,7 @@ def run():
     {"nombre": "eliminar_rol", "descripcion": "Puede eliminar roles"},
     # Permiso
     {"nombre": "asignar_rol", "descripcion": "Puede asignar roles"},
-    {"nombre": "asginar_permiso", "descripcion": "Puede asignar permisos"},
+    {"nombre": "asignar_permiso", "descripcion": "Puede asignar permisos"},
     # Colaborador
     {"nombre": "ver_colaborador", "descripcion": "Puede ver colaboradores"},
     {"nombre": "crear_colaborador", "descripcion": "Puede crear colaboradores"},
