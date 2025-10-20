@@ -1,0 +1,40 @@
+[
+  {
+    "idSesion": "1",
+    "empresa": {
+      "id": "empresa_001",
+      "nombre": "Mi Empresa de Prueba"
+    },
+    "usuario": {
+      "nombre": "Christian Torrez",
+      "usuario": "user1",
+      "rol": "Usuario",
+      "ip": "127.0.0.1",
+      "dispositivo": "PC Escritorio",
+      "sistema": "\"Windows\"",
+      "navegador": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36",
+      "idioma": "es-ES,es;q=0.9"
+    },
+    "eventos": [
+      {
+        "fecha": "2025-10-20T18:27:17.342970Z",
+        "nivel": "INFO",
+        "accion": "Inicio de sesión",
+        "detalle": "El usuario user1 inició sesión correctamente."
+      },
+      {
+        "fecha": "2025-10-20T18:33:52.206283Z",
+        "nivel": "INFO",
+        "accion": "Inicio de sesión",
+        "detalle": "El usuario user1 inició sesión correctamente."
+      },
+      {
+        "fecha": "2025-10-20T18:39:36.674119Z",
+        "nivel": "INFO",
+        "accion": "Inicio de sesión",
+        "detalle": "El usuario user1 inició sesión correctamente."
+      }
+    ],
+    "fechaInicio": "2025-10-20T18:27:17.342970Z"
+  }
+]

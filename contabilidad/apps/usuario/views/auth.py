@@ -1,17 +1,17 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, permissions,generics
+from rest_framework import status, permissions, generics
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema
 from ..serializers import LoginSerializer, RegisterSerializer, UsuarioDetailSerializer
 from django.contrib.auth import get_user_model
+from ...utils.log import registrar_evento
 
 User = get_user_model()
 
-
 class LoginView(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
-    serializer_class = LoginSerializer  # 🔹 importante
+    serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
@@ -26,14 +26,37 @@ class LoginView(generics.GenericAPIView):
             apellido = user.persona.apellido
             email = user.email
             username = user.username
-            print(user.is_staff)
+
+            # 📝 Datos para el log
+            datos_usuario = {
+                "empresa": "empresa_001",  # ⚠️ reemplaza por la empresa real si la tienes
+                "nombreEmpresa": "Mi Empresa de Prueba",
+                "usuario": username,
+                "nombre": f"{nombre} {apellido}",
+                "rol": "Administrador" if user.is_staff else "Usuario",
+                "ip": request.META.get("REMOTE_ADDR", "desconocida"),
+                "dispositivo": "PC Escritorio",
+                "sistema": request.headers.get("sec-ch-ua-platform", "desconocido"),
+                "navegador": request.headers.get("User-Agent", "desconocido"),
+                "idioma": request.headers.get("Accept-Language", "es-BO")
+            }
+
+            # 🪵 Registrar log al iniciar sesión
+            registrar_evento(
+                id_sesion=str(user.id),
+                datos_usuario=datos_usuario,
+                nivel="INFO",
+                accion="Inicio de sesión",
+                detalle=f"El usuario {username} inició sesión correctamente."
+            )
+
             response = Response(
                 {
                     'access': access_token,
                     'user_id': user.id,
                     'username': username,
                     'nombre': nombre,
-                    'superuser' : user.is_staff,
+                    'superuser': user.is_staff,
                     'apellido': apellido,
                     'email': email
                 },
@@ -50,38 +73,3 @@ class LoginView(generics.GenericAPIView):
             return response
 
         return Response({'detail': 'Credenciales inválidas'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-class LogoutView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        response = Response({'detail': 'Logout exitoso'}, status=status.HTTP_200_OK)
-        response.delete_cookie('refreshToken')
-        return response
-
-
-class RefreshView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, request):
-        refresh_token = request.COOKIES.get('refreshToken')
-        if not refresh_token:
-            return Response({'detail': 'No refresh token'}, status=status.HTTP_401_UNAUTHORIZED)
-        try:
-            refresh = RefreshToken(refresh_token)
-            access_token = str(refresh.access_token)
-            return Response({'access': access_token})
-        except:
-            return Response({'detail': 'Token inválido o expirado'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
-class RegisterView(generics.GenericAPIView):
-    permission_classes = [permissions.AllowAny]
-    serializer_class = RegisterSerializer
-
-    def post(self, request):
-        serializer = RegisterSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({'detail': 'Usuario registrado exitosamente'}, status=status.HTTP_201_CREATED)
