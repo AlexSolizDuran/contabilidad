@@ -24,5 +24,5 @@ urlpatterns = [
     path('',include('contabilidad.apps.usuario.urls')),
     path('',include('contabilidad.apps.empresa.urls')),
     path('',include('contabilidad.apps.reporte.urls')),
-    
+    path('',include('contabilidad.apps.suscripcion.urls')),
 ]

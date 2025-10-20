@@ -3,13 +3,13 @@ from django.core.management.base import BaseCommand
 from ...seeds import (
     seed_permiso,seed_custom,seed_plantilla_clase,seed_user
 )
-
+from ....suscripcion.seeds import seed_inicial
 class Command(BaseCommand):
     help = "Ejecuta todos los seeders del módulo plantilla en orden definido"
 
     def handle(self, *args, **kwargs):
         orden_seeders = [
-            seed_user,seed_permiso,seed_custom,seed_plantilla_clase
+            seed_user,seed_permiso,seed_custom,seed_plantilla_clase,seed_inicial
         ]
 
         for seeder in orden_seeders:

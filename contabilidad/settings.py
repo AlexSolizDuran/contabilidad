@@ -50,7 +50,8 @@ INSTALLED_APPS = [
     'contabilidad.apps.usuario',
     'contabilidad.apps.empresa',
     'contabilidad.apps.reporte',
-    'contabilidad.apps.plantilla'
+    'contabilidad.apps.plantilla',
+    'contabilidad.apps.suscripcion',
 ]
 ## parte de djangoRestFramework
 REST_FRAMEWORK = {
@@ -172,7 +173,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 #15/10/2025
 CORS_ALLOWED_ORIGINS = [
     #"https://contabilidad-1.onrender.com",
-    #"http://localhost:3000",
+    "http://172.18.0.2:8080",
     #"https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
     #"https://next-conta.vercel.app",
     "https://contafrontoficial-393159630636.northamerica-south1.run.app"
