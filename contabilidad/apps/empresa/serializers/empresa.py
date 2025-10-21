@@ -11,7 +11,7 @@ class EmpresaCreateSerializer(serializers.ModelSerializer):
         usuario = self.context['request'].user
         empresa = Empresa.objects.create(**validated_data)
         custom = Custom.objects.get(nombre='verde')
-        rol = RolEmpresa.objects.get(nombre='admin')
+        rol = RolEmpresa.objects.get(nombre='admin',empresa=empresa)
         user_empresa = UserEmpresa.objects.create(usuario=usuario, empresa=empresa,custom=custom)
         user_empresa.roles.add(rol)
         return empresa
