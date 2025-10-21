@@ -8,6 +8,9 @@ from datetime import timedelta
 from django.db import transaction
 from datetime import date
 import uuid
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+
 
 class SuscripcionViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
@@ -116,3 +119,64 @@ class SuscripcionViewSet(viewsets.GenericViewSet):
         
         # 5. Respuesta exitosa
         return Response(SubscriptionSuccessSerializer(suscripcion).data, status=status.HTTP_201_CREATED)
+
+class PagoExitosoCallback(APIView):
+    # Permite acceso sin autenticación (ya que Libélula te llama directamente)
+    permission_classes = [AllowAny] 
+    
+    def get(self, request):
+        """
+        Servicio PAGO EXITOSO (Callback de Libélula).
+        Libélula llama a esta URL mediante GET después de un pago exitoso.
+        Parámetro: transaction_id (identificador_deuda que enviamos)
+        """
+        transaction_id = request.query_params.get('transaction_id')
+        
+        if not transaction_id:
+            # Respuesta a Libélula: transacción inválida
+            return Response({"detail": "Falta el identificador de transacción."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # 1. Buscar la suscripción pendiente usando el identificador_deuda como código
+            suscripcion = Suscripcion.objects.get(codigo=transaction_id)
+            
+            # 2. Verificar si ya fue procesada (para evitar doble pago)
+            estado_activo = Estado.objects.get(nombre='activo')
+            if suscripcion.estado == estado_activo:
+                # Ya estaba activa, simplemente respondemos 200 para Libélula
+                return Response({"detail": "Suscripción ya estaba activa."}, status=status.HTTP_200_OK)
+            
+            # 3. Marcar como pagada y activa
+            # Obtenemos el estado 'pagado'
+            estado_pagado = Estado.objects.get(nombre='pagado') # Suponiendo que tienes un estado 'pagado' o usamos 'activo'
+            
+            # En tu implementación, el estado de la suscripción se pone a 'activo'
+            suscripcion.estado = estado_activo 
+            suscripcion.save()
+            
+            # 4. Registrar el Pago (usamos los datos que Libélula nos dio en el callback, aunque aquí solo tenemos el ID)
+            # En un callback real, Libélula envía más datos que podrías usar para crear el objeto Pago
+            
+            # Buscamos el tipo de pago (solo para que no falle la creación)
+            metodo_pago = 'tarjeta' 
+            
+            Pago.objects.create(
+                suscripcion=suscripcion,
+                monto=suscripcion.plan.precio, # Usamos el precio del plan
+                fecha_pago=date.today(),
+                metodos_pago=metodo_pago,
+                estado_pago='pagado',
+                codigo_pago=transaction_id,
+                id_transaccion_externa=request.query_params.get('invoice_id', 'LIBELULA_WEB')
+            )
+            
+            return Response({"detail": "Pago confirmado y suscripción activada."}, status=status.HTTP_200_OK)
+
+        except Suscripcion.DoesNotExist:
+            return Response({"detail": "Deuda no encontrada en el sistema."}, status=status.HTTP_404_NOT_FOUND)
+        except Estado.DoesNotExist:
+            return Response({"detail": "Error de configuración de estados."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        except Exception as e:
+            # Log de cualquier otro error inesperado para revisión
+            print(f"Error procesando callback de Libélula: {e}")
+            return Response({"detail": "Error interno del servidor al procesar el pago."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

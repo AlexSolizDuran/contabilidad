@@ -16,13 +16,24 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path ,include
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
-    path('',include('contabilidad.apps.gestion_cuenta.urls')),
-    path('',include('contabilidad.apps.gestion_asiento.urls')),
-    path('',include('contabilidad.apps.usuario.urls')),
-    path('',include('contabilidad.apps.empresa.urls')),
-    path('',include('contabilidad.apps.reporte.urls')),
+
+    # Apps del proyecto
+    path('', include('contabilidad.apps.gestion_cuenta.urls')),
+    path('', include('contabilidad.apps.gestion_asiento.urls')),
+    path('', include('contabilidad.apps.usuario.urls')),
+    path('', include('contabilidad.apps.empresa.urls')),
+    path('', include('contabilidad.apps.reporte.urls')),
     path('',include('contabilidad.apps.suscripcion.urls')),
+
+    
+    # 🔹 Rutas de documentación automática
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
 ]

@@ -58,4 +58,4 @@ class UserEmpresaDetailSerializer(serializers.ModelSerializer):
     custom = CustomSerializer(read_only=True)
     class Meta:
         model = UserEmpresa
-        fields = ['id','usuario','empresa','roles','custom','texto_tipo','texto_tamaño']
+        fields = ['id','usuario','empresa','roles','custom','texto_tipo','texto_tamano']
