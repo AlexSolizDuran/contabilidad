@@ -12,6 +12,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+<<<<<<< Updated upstream:contabilidad/contabilidad/settings.py
+=======
+import os
+
+
+
+>>>>>>> Stashed changes:contabilidad/settings.py
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,10 +48,20 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_extensions',
     "corsheaders",
+<<<<<<< Updated upstream:contabilidad/contabilidad/settings.py
     'apps.gestion_asientos',
     'apps.gestion_cuentas',
     'apps.usuarios',
     'apps.configurar'
+=======
+    'contabilidad.apps.gestion_asiento',
+    'contabilidad.apps.gestion_cuenta',
+    'contabilidad.apps.usuario',
+    'contabilidad.apps.empresa',
+    'contabilidad.apps.reporte',
+    'contabilidad.apps.plantilla',
+    'contabilidad.apps.ia_reporte'
+>>>>>>> Stashed changes:contabilidad/settings.py
 ]
 ## parte de djangoRestFramework
 REST_FRAMEWORK = {
@@ -154,6 +171,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
+<<<<<<< Updated upstream:contabilidad/contabilidad/settings.py
     "http://localhost:3000",  # tu frontend Next.js
     "https://mi-frontend.com",
 ]
+=======
+    "https://contabilidad-1.onrender.com",
+    "http://localhost:3000",
+    "https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
+    "https://next-conta.vercel.app",
+    
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# Configuración para IA
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+>>>>>>> Stashed changes:contabilidad/settings.py

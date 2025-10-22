@@ -19,9 +19,25 @@ from django.urls import path ,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+<<<<<<< Updated upstream:contabilidad/contabilidad/urls.py
     path('',include('apps.gestion_cuentas.urls')),
     path('',include('apps.gestion_asientos.urls')),
     path('auth/',include('apps.usuarios.urls')),
     path('',include('apps.configurar.urls')),
     
+=======
+
+    # Apps del proyecto
+    path('', include('contabilidad.apps.gestion_cuenta.urls')),
+    path('', include('contabilidad.apps.gestion_asiento.urls')),
+    path('', include('contabilidad.apps.usuario.urls')),
+    path('', include('contabilidad.apps.empresa.urls')),
+    path('', include('contabilidad.apps.reporte.urls')),
+    path('ia/', include('contabilidad.apps.ia_reporte.urls')),
+
+    # 🔹 Rutas de documentación automática
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+>>>>>>> Stashed changes:contabilidad/urls.py
 ]
