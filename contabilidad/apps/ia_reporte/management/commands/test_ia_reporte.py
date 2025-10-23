@@ -31,11 +31,11 @@ class Command(BaseCommand):
         try:
             # Obtener usuario
             usuario = User.objects.get(id=usuario_id)
-            self.stdout.write(f"Usuario encontrado: {usuario.email}")
+            self.stdout.write(f"Usuario encontrado: {usuario.username}")
             
             # Obtener empresa del usuario
             try:
-                user_empresa = UserEmpresa.objects.get(user=usuario)
+                user_empresa = UserEmpresa.objects.get(usuario=usuario)
                 empresa = user_empresa.empresa
                 self.stdout.write(f"Empresa: {empresa.nombre}")
             except UserEmpresa.DoesNotExist:

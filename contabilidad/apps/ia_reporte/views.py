@@ -38,8 +38,9 @@ def generar_reporte_ia(request):
         
         # Obtener la empresa del usuario
         try:
-            user_empresa = UserEmpresa.objects.get(user=usuario)
-            empresa = user_empresa.empresa
+            empresa_id = request.auth.get('empresa') 
+            user_empresa = UserEmpresa.objects.get(usuario=usuario, empresa=empresa_id)
+            empresa = Empresa.objects.get(id=empresa_id)
         except UserEmpresa.DoesNotExist:
             return Response({
                 'success': False,
@@ -138,7 +139,7 @@ def obtener_informacion_empresa(request):
     """
     try:
         usuario = request.user
-        user_empresa = UserEmpresa.objects.get(user=usuario)
+        user_empresa = UserEmpresa.objects.get(usuario=usuario)
         empresa = user_empresa.empresa
         
         # Obtener información básica de la empresa

@@ -12,6 +12,6 @@ class Empresa(models.Model):
         db_table = "empresa"
         
     def __str__(self):
-        return str(self.id) + self.nombre
+        return f"{self.nombre} ({self.nit})"
     
     

@@ -55,4 +55,4 @@ class ClaseCuenta(models.Model):
             ids.extend(hijo.get_descendientes_ids())
         return ids
     def __str__(self):
-        return self.codigo + " - " + self.nombre
+        return str(self.codigo) + " - " + self.nombre

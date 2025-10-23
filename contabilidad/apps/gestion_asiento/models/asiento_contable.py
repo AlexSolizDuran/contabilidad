@@ -36,3 +36,6 @@ class AsientoContable(models.Model):
                 self.numero = ultimo_numero + 1
 
         super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"Asiento #{self.numero} - {self.descripcion}"

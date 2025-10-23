@@ -20,3 +20,6 @@ class Movimiento(models.Model):
         on_delete=models.CASCADE,
         related_name="movimientos"
     )
+    
+    def __str__(self):
+        return f"Movimiento {self.cuenta.codigo} - {self.referencia}"
