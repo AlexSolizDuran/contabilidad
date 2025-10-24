@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from django.db.models import Q, Sum, F
 from django.conf import settings
 from openai import OpenAI
+from django.db.models import Sum
+from datetime import datetime
 
 from .config import IAConfig
 from contabilidad.apps.gestion_cuenta.models import Cuenta, ClaseCuenta
@@ -223,42 +225,48 @@ class IAReporteService:
         """
         fecha_fin = interpretacion.get('fecha_fin')
         if not fecha_fin:
-            fecha_fin = datetime.now()
+            fecha_fin = datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999)
         else:
             fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d')
+            fecha_fin = fecha_fin.replace(hour=23, minute=59, second=59, microsecond=999999)
         
         # Obtener saldos de cuentas
         movimientos = Movimiento.objects.filter(
             asiento_contable__empresa=empresa,
-            asiento_contable__estado='APROBADO',
+            asiento_contable__estado__iexact='APROBADO',
             asiento_contable__created_at__lte=fecha_fin
         ).values('cuenta').annotate(
             total_debe=Sum('debe'),
             total_haber=Sum('haber')
         )
-        
+      
         cuentas_saldos = {}
         for mov in movimientos:
             cuenta_id = mov['cuenta']
             saldo = (mov['total_debe'] or 0) - (mov['total_haber'] or 0)
             cuentas_saldos[cuenta_id] = saldo
         
-        # Agrupar por clases
+        print(cuentas_saldos)
+        # Agrupar por clases - CORRECCIÓN AQUÍ
+    
+        # Se obtienen todas las clases de cuenta que empiecen por '1' (Activo)
         clases_activo = ClaseCuenta.objects.filter(
             empresa=empresa,
-            codigo__in=[1, 11, 12, 111, 112, 113, 114, 121, 122, 123, 124]
+            codigo='1' 
         )
         
+        # Se obtienen todas las clases de cuenta que empiecen por '2' (Pasivo)
         clases_pasivo = ClaseCuenta.objects.filter(
             empresa=empresa,
-            codigo__in=[2, 21, 22, 211, 212]
+            codigo='2'
         )
         
+        # Se obtienen todas las clases de cuenta que empiecen por '3' (Patrimonio)
         clases_patrimonio = ClaseCuenta.objects.filter(
             empresa=empresa,
-            codigo__in=[3, 31, 32, 33, 34]
+            codigo='3'
         )
-        
+    
         return {
             'tipo': 'balance_general',
             'fecha_corte': fecha_fin.strftime('%Y-%m-%d'),
@@ -271,33 +279,49 @@ class IAReporteService:
         """
         Genera un estado de resultados.
         """
-        fecha_inicio = interpretacion.get('fecha_inicio')
-        fecha_fin = interpretacion.get('fecha_fin')
-        
-        if not fecha_inicio:
-            fecha_inicio = datetime(datetime.now().year, 1, 1)
+        # === INICIO CORRECCIÓN DE FECHA INICIO ===
+        fecha_inicio_str = interpretacion.get('fecha_inicio')
+        if not fecha_inicio_str:
+            fecha_inicio = datetime(datetime.now().year, 1, 1).replace(hour=0, minute=0, second=0)
         else:
-            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d')
-            
-        if not fecha_fin:
-            fecha_fin = datetime.now()
+            fecha_inicio = datetime.strptime(fecha_inicio_str, '%Y-%m-%d').replace(hour=0, minute=0, second=0)
+        # === FIN CORRECCIÓN ===
+
+        # === INICIO CORRECCIÓN DE FECHA FIN ===
+        fecha_fin_str = interpretacion.get('fecha_fin')
+        if not fecha_fin_str:
+            fecha_fin = datetime.now().replace(hour=23, minute=59, second=59)
         else:
-            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d')
-        
+            fecha_fin = datetime.strptime(fecha_fin_str, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+        # === FIN CORRECCIÓN ===
+
+        # === INICIO CORRECCIÓN DE CLASES ===
+        # Solo necesitamos pasar la clase raíz. La otra función buscará la jerarquía.
+
         # Ingresos (clase 4)
-        ingresos = self._calcular_movimientos_por_clase(empresa, [4, 41, 42, 43], fecha_inicio, fecha_fin)
-        
+        ingresos = self._calcular_movimientos_por_clase(empresa, ['4'], fecha_inicio, fecha_fin)
+
         # Costos y gastos (clase 5)
-        costos_gastos = self._calcular_movimientos_por_clase(empresa, [5, 51, 52, 53, 54, 55], fecha_inicio, fecha_fin)
-        
-        utilidad_bruta = ingresos['total'] - costos_gastos.get('costo_ventas', 0)
-        utilidad_operacional = utilidad_bruta - costos_gastos.get('gastos_operacionales', 0)
-        utilidad_neta = utilidad_operacional - costos_gastos.get('gastos_financieros', 0)
-        
+        costos_gastos = self._calcular_movimientos_por_clase(empresa, ['5'], fecha_inicio, fecha_fin)
+        # === FIN CORRECCIÓN DE CLASES ===
+
+        # Ajusta esto según tu lógica contable
+        # Asumimos que los ingresos (4) son Haber (positivos) y Costos (5) son Debe (positivos)
+        # La consulta (debe - haber) dará negativo para Ingresos y positivo para Costos.
+        # Por eso multiplicamos por -1.
+        total_ingresos = ingresos['total'] * -1 
+        total_costos_gastos = costos_gastos['total']
+
+        # A_generar_estado_resultadosjusta tus cálculos de utilidad según necesites.
+        # Esto es solo un ejemplo.
+        utilidad_bruta = total_ingresos - total_costos_gastos 
+        utilidad_operacional = utilidad_bruta # Añadir gastos operacionales si los separas
+        utilidad_neta = utilidad_operacional # Añadir impuestos, etc.
+
         return {
             'tipo': 'estado_resultados',
             'periodo': {
-                'inicio': fecha_inicio.strftime('%Y-%m-%d'),
+            'inicio': fecha_inicio.strftime('%Y-%m-%d'),
                 'fin': fecha_fin.strftime('%Y-%m-%d')
             },
             'ingresos': ingresos,
@@ -316,14 +340,14 @@ class IAReporteService:
         cuentas_especificas = interpretacion.get('cuentas_especificas', [])
         
         if not fecha_inicio:
-            fecha_inicio = datetime(datetime.now().year, 1, 1)
+            fecha_inicio = datetime(datetime.now().year, 1, 1).replace(hour=0, minute=0, second=0)
         else:
-            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d')
+            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').replace(hour=0, minute=0, second=0)
             
         if not fecha_fin:
-            fecha_fin = datetime.now()
+            fecha_fin = datetime.now().replace(hour=23, minute=59, second=59)
         else:
-            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d')
+            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
         
         # Filtrar cuentas
         cuentas_query = Cuenta.objects.filter(empresa=empresa, estado='ACTIVO')
@@ -443,18 +467,19 @@ class IAReporteService:
     
     def _calcular_totales_por_clases(self, clases, cuentas_saldos):
         """
-        Calcula totales por clases de cuentas.
+        Calcula totales por clases de cuentas, manejando jerarquía.
         """
         resultado = []
         for clase in clases:
             cuentas_clase = Cuenta.objects.filter(
-                clase_cuenta=clase,
+                clase_cuenta__codigo__startswith=clase.codigo, 
+                clase_cuenta__empresa=clase.empresa, # Asegura que sea de la misma empresa
                 estado='ACTIVO'
             )
-            
+
             total_clase = 0
             cuentas_detalle = []
-            
+
             for cuenta in cuentas_clase:
                 saldo = cuentas_saldos.get(cuenta.id, 0)
                 if saldo != 0:
@@ -462,19 +487,18 @@ class IAReporteService:
                         'codigo': cuenta.codigo,
                         'nombre': cuenta.nombre,
                         'saldo': float(saldo)
-                    })
+                        })
                     total_clase += saldo
-            
             if cuentas_detalle:
                 resultado.append({
-                    'clase': {
+                'clase': {
                         'codigo': clase.codigo,
                         'nombre': clase.nombre
-                    },
+                },
                     'total': float(total_clase),
                     'cuentas': cuentas_detalle
                 })
-        
+
         return resultado
     
     def _calcular_movimientos_por_clase(self, empresa, codigos_clases, fecha_inicio, fecha_fin):
@@ -483,38 +507,44 @@ class IAReporteService:
         """
         clases = ClaseCuenta.objects.filter(
             empresa=empresa,
-            codigo__in=codigos_clases
+            codigo__in=codigos_clases # Esto ahora solo recibirá ['4'] o ['5']
         )
-        
+
         total = 0
         detalle = []
-        
+
         for clase in clases:
+            # === INICIO DE LA CORRECCIÓN ===
+            # Buscar todas las cuentas cuya clase_cuenta COMIENCE CON el código de la clase raíz
             cuentas = Cuenta.objects.filter(
-                clase_cuenta=clase,
+                clase_cuenta__codigo__startswith=clase.codigo,
+                clase_cuenta__empresa=empresa, # Asegurar la empresa
                 estado='ACTIVO'
             )
-            
+            # === FIN DE LA CORRECCIÓN ===
+
             movimientos = Movimiento.objects.filter(
                 cuenta__in=cuentas,
                 asiento_contable__empresa=empresa,
                 asiento_contable__estado='APROBADO',
-                asiento_contable__created_at__range=[fecha_inicio, fecha_fin]
+                # El rango de fechas ahora incluye el día completo
+                asiento_contable__created_at__range=[fecha_inicio, fecha_fin] 
             )
-            
+
+            # (Debe - Haber)
             total_clase = sum(m.debe - m.haber for m in movimientos)
             total += total_clase
-            
+
             if total_clase != 0:
                 detalle.append({
-                    'clase': {
+                        'clase': {
                         'codigo': clase.codigo,
                         'nombre': clase.nombre
                     },
                     'total': float(total_clase)
-                })
-        
-        return {
-            'total': float(total),
-            'detalle': detalle
-        }
+                    })
+
+            return {
+                'total': float(total),
+                'detalle': detalle
+            }
