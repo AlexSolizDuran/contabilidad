@@ -1,124 +1,191 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from .models import Suscripcion, Estado, TipoPlan, Pago # Importamos TipoPlan
-from .serializers import SuscripcionDetailSerializer, TipoPlanSerializer, PaymentRequestSerializer, SubscriptionSuccessSerializer
-from datetime import timedelta
-from django.db import transaction
-from datetime import date
-import uuid
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
-
+from django.db import transaction
+from django.conf import settings
+from decouple import config
+from datetime import date, timedelta
+import uuid
+import requests
+import json # <-- NECESARIO PARA json.dumps
+from .models import Suscripcion, Estado, TipoPlan, Pago
+from .serializers import (
+    SuscripcionDetailSerializer, 
+    TipoPlanSerializer, 
+    PaymentRequestSerializer, 
+    SubscriptionSuccessSerializer
+)
 
 class SuscripcionViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = SuscripcionDetailSerializer
 
     def get_queryset(self):
-        # Devuelve las suscripciones del usuario autenticado
         return Suscripcion.objects.filter(user=self.request.user)
 
     @action(detail=False, methods=['get'], url_path='activa')
     def get_suscripcion_activa(self, request):
         """
         Endpoint: GET /suscripcion/activa/
-        1. Devuelve la suscripción activa del usuario.
-        2. Si no hay, devuelve una lista de planes disponibles (TipoPlan) con código 404.
+        Devuelve la suscripción activa o los planes disponibles (con 404).
         """
-        
-        # 1. Busca el estado 'activo'
         try:
             estado_activo = Estado.objects.get(nombre='activo')
         except Estado.DoesNotExist:
-            return Response({"detail": "Estado 'activo' no configurado."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"detail": "Error de configuración: Estado 'activo' no encontrado."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # 2. Busca la suscripción activa más reciente para el usuario
         suscripcion = self.get_queryset().filter(estado=estado_activo).order_by('-fecha_inicio').first()
 
         if suscripcion:
-            # Si se encuentra, devuelve la suscripción
             serializer = self.get_serializer(suscripcion)
             return Response(serializer.data, status=status.HTTP_200_OK)
         
-        # 3. SI NO HAY SUSCRIPCIÓN ACTIVA: Devolver los planes disponibles con 404
-        
-        # Obtenemos todos los TipoPlan y prefetchamos las relaciones anidadas
         planes_disponibles = TipoPlan.objects.all().select_related('plan', 'caracteristica')
-        
-        # Usamos TipoPlanSerializer (necesitas asegurarte de que está importado correctamente)
         serializer = TipoPlanSerializer(planes_disponibles, many=True)
         
-        # Devolvemos los planes disponibles con un código 404 y un mensaje clave
         return Response({
             "detail": "No se encontró suscripción activa.",
             "planes_disponibles": serializer.data
         }, status=status.HTTP_404_NOT_FOUND)
-    
+
     @action(detail=False, methods=['post'], url_path='confirmar_compra')
     def create_subscription_and_pay(self, request):
         """
         Endpoint: POST /suscripcion/confirmar_compra/
-        Recibe el ID del plan, simula el pago, y crea/activa la suscripción.
+        Maneja planes gratuitos (activación directa) o planes de pago (Libélula).
         """
         serializer = PaymentRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         
-        # ...existing code...
         user = request.user
-        if not getattr(user, 'is_authenticated', False):
-            return Response({'detail': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
-        # ...existing code...
         tipo_plan = serializer.validated_data['tipo_plan']
         
-        # Usamos transaction.atomic para asegurar que todo se guarde o nada se guarde.
-        with transaction.atomic():
-            # 1. Desactivar suscripciones anteriores (opcional pero recomendado)
-            estado_nulo = Estado.objects.get(nombre='nulo')
-            Suscripcion.objects.filter(user=user, estado__nombre='activo').update(estado=estado_nulo)
-            
-            estado_activo = Estado.objects.get(nombre='activo')
-            
-            # 2. Calcular fechas y características
-            fecha_inicio = date.today()
-            # Si la duración es 0 (gratuito) o positiva
-            if tipo_plan.duracion_mes > 0:
-                 fecha_fin = fecha_inicio + timedelta(days=30 * tipo_plan.duracion_mes)
-                 dias_restantes = (fecha_fin - fecha_inicio).days
-            else:
-                 # Plan gratuito o indefinido (ponemos un límite grande o lo manejamos en el front)
-                 fecha_fin = fecha_inicio + timedelta(days=36500) # 100 años
-                 dias_restantes = 36500
-
-            # 3. Crear la nueva suscripción
-            suscripcion = Suscripcion.objects.create(
-                user=user,
-                estado=estado_activo,
-                plan=tipo_plan, 
-                fecha_inicio=fecha_inicio,
-                fecha_fin=fecha_fin,
-                codigo=f'SUB-{uuid.uuid4().hex[:6]}',
-                dia_restante=dias_restantes,
-                empresa_disponible=tipo_plan.caracteristica.cant_empresas or 999,
-                colab_disponible=tipo_plan.caracteristica.cant_colab or 999,
-            )
-            
-            # 4. Simular Pago Ficticio (si el precio es > 0)
-            if tipo_plan.precio > 0:
-                # Simulamos que la pasarela de pago CONFIRMÓ el pago
-                Pago.objects.create(
-                    suscripcion=suscripcion,
-                    monto=tipo_plan.precio,
-                    fecha_pago=date.today(),
-                    metodos_pago='tarjeta', # Fijo según la simulación
-                    estado_pago='pagado',   # ✅ Simulación: SIEMPRE 'pagado'
-                    codigo_pago=f'PAY-{uuid.uuid4().hex[:8]}',
-                    id_transaccion_externa='SIMULATED-SUCCESS'
-                )
+        # Lógica de cálculo de fechas (Común a ambos flujos)
+        if tipo_plan.duracion_mes > 0:
+            fecha_fin_deuda = date.today() + timedelta(days=tipo_plan.duracion_mes * 30)
+            dias_restantes = tipo_plan.duracion_mes * 30
+        else:
+            fecha_fin_deuda = date.today() + timedelta(days=36500) 
+            dias_restantes = 36500
         
-        # 5. Respuesta exitosa
-        return Response(SubscriptionSuccessSerializer(suscripcion).data, status=status.HTTP_201_CREATED)
+        #FLUJO 1: PLAN GRATUITO (Activar directamente)
+        if tipo_plan.precio == 0:
+            print("Procesando plan gratuito...")
+            print(f"precio tipo_plan: {tipo_plan.precio}")
+            try:
+                with transaction.atomic():
+                    estado_activo = Estado.objects.get(nombre='activo')
+                    estado_nulo = Estado.objects.get(nombre='nulo')
+                    
+                    # Desactivar suscripciones anteriores
+                    #Suscripcion.objects.filter(user=user, estado=estado_activo).update(estado=estado_nulo)
+                    
+                    suscripcion = Suscripcion.objects.create(
+                        user=user,
+                        estado=estado_activo,
+                        plan=tipo_plan, 
+                        fecha_inicio=date.today(),
+                        fecha_fin=fecha_fin_deuda,
+                        codigo=f"SUB-GRATIS-{str(user.id)}", 
+                        dia_restante=dias_restantes,
+                        empresa_disponible=tipo_plan.caracteristica.cant_empresas or 1,
+                        colab_disponible=tipo_plan.caracteristica.cant_colab or 1,
+                    )
+                    
+                    return Response(SubscriptionSuccessSerializer(suscripcion).data, status=status.HTTP_201_CREATED)
+
+            except Estado.DoesNotExist:
+                return Response({"detail": "Error de configuración: Los estados 'activo' o 'nulo' son requeridos en la DB."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            except Exception as e:
+                print(f"Error procesando plan gratuito: {e}")
+                return Response({"detail": f"Error interno al activar plan gratuito: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        # FLUJO 2: PLAN DE PAGO (Llamada a Libélula)
+        # Preparar URLs de Callback y Retorno
+        identificador_deuda = f"SUB-{str(user.id).zfill(8)}-{uuid.uuid4().hex[:8]}" 
+        
+        callback_url = f"{settings.DJANGO_PUBLIC_URL}/suscripcion/pago_exitoso" #url del dominio del backend
+        return_url = f"https://contafrontoficial-393159630636.northamerica-south1.run.app/librovivo/darshboard" #url del dominio del frontend
+        
+        # CORRECCIÓN CLAVE: El campo concepto debe ser una string válida y limpia
+        concepto_item = f"Suscripción {tipo_plan.plan.nombre} {tipo_plan.duracion_mes} mes(es)"
+        
+        lineas_detalle_deuda = [
+            { 
+                "concepto": concepto_item.strip(), # Aplicamos .strip() y aseguramos la string
+                "cantidad": 1, 
+                "costo_unitario": float(tipo_plan.precio), 
+                "descuento_unitario": 0
+            }
+        ]
+
+        libelula_payload = {
+            "appkey": settings.LIBELULA_APPKEY,
+            "email_cliente": user.email, 
+            "identificador_deuda": identificador_deuda, 
+            "fecha_vencimiento": (date.today() + timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S"),
+            "descripcion": f"Pago de suscripción {tipo_plan.plan.nombre}",
+            "callback_url": callback_url, 
+            "url_retorno": return_url,
+            "nombre_cliente": user.persona.nombre,
+            "apellido_cliente": user.persona.apellido,
+            "ci": user.persona.ci or "",
+            "razon_social": f"{user.persona.nombre} {user.persona.apellido}",
+            "nit": user.persona.ci or "99002",
+            "emite_factura": True, 
+            "moneda": "BOB",
+        }
+
+        # Añadir las líneas de detalle en el formato esperado por Libélula
+        for i, item in enumerate(lineas_detalle_deuda):
+            libelula_payload[f"lineas_detalle_deuda[{i}].concepto"] = item["concepto"]
+            libelula_payload[f"lineas_detalle_deuda[{i}].cantidad"] = item["cantidad"]
+            libelula_payload[f"lineas_detalle_deuda[{i}].costo_unitario"] = item["costo_unitario"]
+            libelula_payload[f"lineas_detalle_deuda[{i}].descuento_unitario"] = item["descuento_unitario"]
+
+        # 2. Llamar a la API de Libélula
+        LIBELULA_ENDPOINT = f"{settings.LIBELULA_URL}/rest/deuda/registrar"
+        
+        try:
+            response = requests.post(LIBELULA_ENDPOINT, data=libelula_payload)
+            response.raise_for_status() 
+
+            libelula_data = response.json()
+
+            if libelula_data.get("error") == 0 and "url_pasarela_pagos" in libelula_data:
+                # Éxito de registro de deuda: Guardar como PENDIENTE
+                with transaction.atomic():
+                    estado_pendiente = Estado.objects.get(nombre='pendiente')
+                    Suscripcion.objects.create(
+                        user=user,
+                        estado=estado_pendiente,
+                        plan=tipo_plan, 
+                        fecha_inicio=date.today(),
+                        fecha_fin=fecha_fin_deuda,
+                        codigo=identificador_deuda, 
+                        dia_restante=dias_restantes,
+                        empresa_disponible=tipo_plan.caracteristica.cant_empresas or 999,
+                        colab_disponible=tipo_plan.caracteristica.cant_colab or 999,
+                    )
+                
+                return Response({
+                    "url_pasarela_pagos": libelula_data["url_pasarela_pagos"],
+                    "id_transaccion": libelula_data["id_transaccion"]
+                }, status=status.HTTP_200_OK)
+            else:
+                # Falla de Libélula (error != 0)
+                return Response({
+                    "detail": libelula_data.get("mensaje", "Error desconocido de Libélula al registrar la deuda.")
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error de conexión con Libélula: {e}")
+            return Response({"detail": f"Error de conexión con la pasarela de pagos: {e}"}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except Estado.DoesNotExist:
+            return Response({"detail": "Estado 'pendiente' no encontrado. Ejecute los seeders."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class PagoExitosoCallback(APIView):
     # Permite acceso sin autenticación (ya que Libélula te llama directamente)
@@ -127,45 +194,35 @@ class PagoExitosoCallback(APIView):
     def get(self, request):
         """
         Servicio PAGO EXITOSO (Callback de Libélula).
-        Libélula llama a esta URL mediante GET después de un pago exitoso.
-        Parámetro: transaction_id (identificador_deuda que enviamos)
         """
         transaction_id = request.query_params.get('transaction_id')
         
         if not transaction_id:
-            # Respuesta a Libélula: transacción inválida
             return Response({"detail": "Falta el identificador de transacción."}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             # 1. Buscar la suscripción pendiente usando el identificador_deuda como código
             suscripcion = Suscripcion.objects.get(codigo=transaction_id)
             
-            # 2. Verificar si ya fue procesada (para evitar doble pago)
+            # 2. Obtener estados y verificar
             estado_activo = Estado.objects.get(nombre='activo')
             if suscripcion.estado == estado_activo:
-                # Ya estaba activa, simplemente respondemos 200 para Libélula
                 return Response({"detail": "Suscripción ya estaba activa."}, status=status.HTTP_200_OK)
             
-            # 3. Marcar como pagada y activa
-            # Obtenemos el estado 'pagado'
-            estado_pagado = Estado.objects.get(nombre='pagado') # Suponiendo que tienes un estado 'pagado' o usamos 'activo'
-            
-            # En tu implementación, el estado de la suscripción se pone a 'activo'
+            # 3. Activar Suscripción
+            estado_pagado = 'pagado'
             suscripcion.estado = estado_activo 
             suscripcion.save()
             
-            # 4. Registrar el Pago (usamos los datos que Libélula nos dio en el callback, aunque aquí solo tenemos el ID)
-            # En un callback real, Libélula envía más datos que podrías usar para crear el objeto Pago
-            
-            # Buscamos el tipo de pago (solo para que no falle la creación)
-            metodo_pago = 'tarjeta' 
+            # 4. Registrar el Pago
+            metodo_pago = 'tarjeta' # Valor por defecto
             
             Pago.objects.create(
                 suscripcion=suscripcion,
-                monto=suscripcion.plan.precio, # Usamos el precio del plan
+                monto=suscripcion.plan.precio,
                 fecha_pago=date.today(),
                 metodos_pago=metodo_pago,
-                estado_pago='pagado',
+                estado_pago=estado_pagado, 
                 codigo_pago=transaction_id,
                 id_transaccion_externa=request.query_params.get('invoice_id', 'LIBELULA_WEB')
             )
@@ -177,6 +234,5 @@ class PagoExitosoCallback(APIView):
         except Estado.DoesNotExist:
             return Response({"detail": "Error de configuración de estados."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
-            # Log de cualquier otro error inesperado para revisión
             print(f"Error procesando callback de Libélula: {e}")
             return Response({"detail": "Error interno del servidor al procesar el pago."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

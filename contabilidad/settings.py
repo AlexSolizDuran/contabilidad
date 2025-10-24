@@ -32,9 +32,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-LIBELULA_APPKEY = '11bb10ce-68ba-4af1-8eb7-4e6624fed729'
-LIBELULA_URL = 'https://api.libelula.bo'
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -160,6 +157,11 @@ DATABASES = {
     }
 }
 
+LIBELULA_APPKEY = config('LIBELULA_APPKEY')
+LIBELULA_URL = config( 'LIBELULA_URL')
+DJANGO_PUBLIC_URL = config('DJANGO_PUBLIC_URL')
+
+
 '''
 DATABASES = {
     'default': {
@@ -195,7 +197,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 #15/10/2025
 CORS_ALLOWED_ORIGINS = [
     #"https://contabilidad-1.onrender.com",
-    "http://172.18.0.2:8080",
+    #"http://172.18.0.2:8080",
     #"https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
     #"https://next-conta.vercel.app",
     "https://contafrontoficial-393159630636.northamerica-south1.run.app"

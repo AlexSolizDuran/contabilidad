@@ -41,10 +41,10 @@ def run():
     # 4️⃣ Cargar tipos de plan usando objetos
     tipos_de_plan = [
         {"duracion_mes": 1, "precio": 0.0, "codigo": "gr00", "plan": plan_basic, "caracteristica": car_basic},
-        {"duracion_mes": 1, "precio": 169.99, "codigo": "pro06", "plan": plan_pro, "caracteristica": car_pro},
-        {"duracion_mes": 12, "precio": 1669.99, "codigo": "pro12", "plan": plan_pro, "caracteristica": car_pro},
-        {"duracion_mes": 1, "precio": 549.99, "codigo": "emp06", "plan": plan_emp, "caracteristica": car_emp},
-        {"duracion_mes": 12, "precio": 5499.99, "codigo": "emp12", "plan": plan_emp, "caracteristica": car_emp},
+        {"duracion_mes": 1, "precio": 0.1, "codigo": "pro06", "plan": plan_pro, "caracteristica": car_pro},
+        {"duracion_mes": 12, "precio": 0.1, "codigo": "pro12", "plan": plan_pro, "caracteristica": car_pro},
+        {"duracion_mes": 1, "precio": 0.1, "codigo": "emp06", "plan": plan_emp, "caracteristica": car_emp},
+        {"duracion_mes": 12, "precio": 0.1, "codigo": "emp12", "plan": plan_emp, "caracteristica": car_emp},
     ]
 
     for t in tipos_de_plan:
