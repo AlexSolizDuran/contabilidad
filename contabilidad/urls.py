@@ -29,8 +29,8 @@ urlpatterns = [
     path('', include('contabilidad.apps.empresa.urls')),
     path('', include('contabilidad.apps.reporte.urls')),
     path('',include('contabilidad.apps.suscripcion.urls')),
+    path('ia/', include('contabilidad.apps.ia_reporte.urls')),
 
-    
     # 🔹 Rutas de documentación automática
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

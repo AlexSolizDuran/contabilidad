@@ -8,3 +8,6 @@ class Custom(models.Model):
     color_terciario = models.CharField(max_length=7)
     class Meta:
         db_table = "custom"
+    
+    def __str__(self):
+        return self.nombre

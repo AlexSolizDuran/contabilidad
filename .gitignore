@@ -43,3 +43,6 @@ node_modules/
 
 # Local settings
 local_settings.py
+
+
+logs/

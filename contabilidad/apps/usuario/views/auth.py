@@ -1,17 +1,17 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, permissions,generics
+from rest_framework import status, permissions, generics
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema
 from ..serializers import LoginSerializer, RegisterSerializer, UsuarioDetailSerializer
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
 
+User = get_user_model()
 
 class LoginView(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
-    serializer_class = LoginSerializer  # 🔹 importante
+    serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
@@ -26,14 +26,16 @@ class LoginView(generics.GenericAPIView):
             apellido = user.persona.apellido
             email = user.email
             username = user.username
-            print(user.is_staff)
+
+           
+
             response = Response(
                 {
                     'access': access_token,
                     'user_id': user.id,
                     'username': username,
                     'nombre': nombre,
-                    'superuser' : user.is_staff,
+                    'superuser': user.is_staff,
                     'apellido': apellido,
                     'email': email
                 },

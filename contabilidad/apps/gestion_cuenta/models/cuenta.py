@@ -62,6 +62,9 @@ class Cuenta(models.Model):
             raise ValidationError({
                 "detail": f"Ocurrió un error al guardar la cuenta: {str(e)}"
             })
+    
+    def __str__(self):
+        return f"{self.codigo} - {self.nombre}"
 
 
     

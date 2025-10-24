@@ -8,7 +8,7 @@ from ...empresa.serializers import CustomDetailSerializer
 from ...usuario.serializers import UsuarioDetailSerializer
 from ..serializers import   UserEmpresaDetailSerializer
 from ...empresa.models import Permiso
-
+from ...utils.log import registrar_evento
 
 class AuthViewSet(viewsets.ViewSet):
       # usuario ya logeado
@@ -36,7 +36,31 @@ class AuthViewSet(viewsets.ViewSet):
         refresh['empresa'] = str(empresa.id)  # ✅ Guardamos la empresa en el token
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
-        print(permisos_list)
+        datos_usuario = {
+                "empresa": str(empresa.id),  # ⚠️ reemplaza por la empresa real si la tienes
+                "nombreEmpresa": empresa.nombre,
+                "usuario": user_obj.username,
+                "nombre": user["persona"].get("nombre", "") + " " + user["persona"].get("apellido", ""),
+                "rol": "Administrador" if user_obj.is_staff else "Usuario",
+                "ip": request.META.get("REMOTE_ADDR", "desconocida"),
+                "dispositivo": "PC Escritorio",
+                "sistema": request.META.get("HTTP_SEC_CH_UA_PLATFORM") \
+                                or request.META.get("OS") \
+                                or "desconocido",
+                "navegador": request.META.get("HTTP_USER_AGENT", "desconocido"),
+                "idioma": request.META.get("HTTP_ACCEPT_LANGUAGE", "desconocido")
+            }
+        
+            # 🪵 Registrar log al iniciar sesión
+        registrar_evento(
+            id_sesion=str(access_token),
+            empresa_id=str(empresa.id),
+            usuario_id=user_obj.id,
+            datos_usuario=datos_usuario,
+            nivel="INFO",
+            accion="Inicio de sesión",
+            detalle=f"El usuario {user_obj.username} inició sesión correctamente."
+        )
         # --- Respuesta con cookies y access token ---
         response = Response({'access': access_token,
                              'empresa': empresa.id,
