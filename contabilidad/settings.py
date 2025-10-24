@@ -144,7 +144,7 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-#configurar para la base datoss
+#configurar para la base datos
 
 DATABASES = {
     'default': {
