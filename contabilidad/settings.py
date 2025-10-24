@@ -12,10 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 from decouple import config
-
-
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,7 +49,8 @@ INSTALLED_APPS = [
     'contabilidad.apps.usuario',
     'contabilidad.apps.empresa',
     'contabilidad.apps.reporte',
-    'contabilidad.apps.plantilla'
+    'contabilidad.apps.plantilla',
+    'contabilidad.apps.ia_reporte'
 ]
 ## parte de djangoRestFramework
 REST_FRAMEWORK = {
@@ -194,6 +193,19 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
     "https://next-conta.vercel.app",
-    
 ]
+
 CORS_ALLOW_CREDENTIALS = True
+
+# Configuración para IA
+OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY', '')
+OPENAI_MODEL = 'gpt-3.5-turbo'
+OPENAI_TEMPERATURE = 0.1
+OPENAI_MAX_TOKENS = 1000
+
+# Configuración de límites para reportes IA
+IA_MAX_CUENTAS_REPORTE = 50
+IA_MAX_ASIENTOS_REPORTE = 100
+IA_CONTEXTO_EMPRESA_LIMIT = 20
+IA_DEFAULT_YEAR = None  # None = año actual
+
