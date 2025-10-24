@@ -8,3 +8,6 @@ class RolEmpresa(models.Model):
     usuarios = models.ManyToManyField(UserEmpresa, related_name='roles')
     class Meta:
         db_table = "rol_empresa"
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.empresa.nombre}"

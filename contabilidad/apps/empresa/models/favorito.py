@@ -8,4 +8,7 @@ class Favorito(models.Model):
     ruta = models.CharField(max_length=255)
     nombre = models.CharField(max_length=255)
     
+    def __str__(self):
+        return self.nombre
+    
     

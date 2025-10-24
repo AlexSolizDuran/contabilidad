@@ -15,4 +15,7 @@ class UserEmpresa(models.Model):
     class Meta:
         db_table = "user_empresa"  
         unique_together = ('usuario', 'empresa')
+    
+    def __str__(self):
+        return f"{self.usuario.username} - {self.empresa.nombre}"
         
