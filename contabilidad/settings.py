@@ -32,7 +32,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -43,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'django_extensions',
     "corsheaders",
     'contabilidad.apps.gestion_asiento',
@@ -50,10 +50,13 @@ INSTALLED_APPS = [
     'contabilidad.apps.usuario',
     'contabilidad.apps.empresa',
     'contabilidad.apps.reporte',
-    'contabilidad.apps.plantilla'
+    'contabilidad.apps.plantilla',
+    'contabilidad.apps.suscripcion',
 ]
 ## parte de djangoRestFramework
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',  # opcional
@@ -73,6 +76,23 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,  # usa la secret key de tu proyecto
     "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API del Proyecto Django',
+    'DESCRIPTION': 'Documentación automática con autenticación JWT',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SECURITY': [{'BearerAuth': []}],
+    'COMPONENTS': {
+        'securitySchemes': {
+            'BearerAuth': {
+                'type': 'http',
+                'scheme': 'bearer',
+                'bearerFormat': 'JWT',
+            },
+        },
+    },
 }
 
 MIDDLEWARE = [
@@ -137,6 +157,11 @@ DATABASES = {
     }
 }
 
+LIBELULA_APPKEY = config('LIBELULA_APPKEY')
+LIBELULA_URL = config( 'LIBELULA_URL')
+DJANGO_PUBLIC_URL = config('DJANGO_PUBLIC_URL')
+
+
 '''
 DATABASES = {
     'default': {
@@ -172,7 +197,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 #15/10/2025
 CORS_ALLOWED_ORIGINS = [
     #"https://contabilidad-1.onrender.com",
-    #"http://localhost:3000",
+    #"http://172.18.0.2:8080",
     #"https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
     #"https://next-conta.vercel.app",
     "https://contafrontoficial-393159630636.northamerica-south1.run.app"

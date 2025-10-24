@@ -6,8 +6,9 @@ def run():
             "username": "user1",
             "email": "user1@gmail.com",
             "password": "123456",
-            "nombre": "Admin",
-            "apellido": "Principal",
+            "is_staff": False,
+            "nombre": "Christian",
+            "apellido": "Torrez",
             "ci": "123456",
             "telefono": "77777777"
         },
@@ -15,10 +16,21 @@ def run():
             "username": "user2",
             "email": "user2@gmail.com",
             "password": "123456",
+            "is_staff": False,
             "nombre": "Juan",
             "apellido": "Perez",
             "ci": "987654",
             "telefono": "77788888"
+        },
+        {
+            "username": "admin1",
+            "email": "admin1@gmail.com",
+            "password": "123456",
+            "is_staff": True,
+            "nombre": "Admin",
+            "apellido": "Principal",
+            "ci": "7878787",
+            "telefono": "77777777"
         },
     ]
 

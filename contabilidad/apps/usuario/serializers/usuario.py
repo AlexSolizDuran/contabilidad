@@ -16,7 +16,7 @@ class UsuarioListSerializer(serializers.ModelSerializer):
     persona = PersonaSerializer()
     class Meta:
         model = User
-        fields = ['username','email','persona']
+        fields = ['id','username','email','persona']
 
     
     

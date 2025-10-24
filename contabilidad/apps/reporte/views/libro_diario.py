@@ -7,7 +7,7 @@ from django.utils.dateparse import parse_date
 from rest_framework.response import Response
 from django.db.models import Sum
 
-class LibroDiarioViewSet(viewsets.ModelViewSet):
+class LibroDiarioViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = LibroDiarioSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [filters.OrderingFilter]

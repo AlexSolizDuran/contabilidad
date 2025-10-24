@@ -7,7 +7,7 @@ from ..serializers import LoginEmpresaSerializer
 from ...empresa.serializers import CustomDetailSerializer
 from ...usuario.serializers import UsuarioDetailSerializer
 from ..serializers import   UserEmpresaDetailSerializer
-
+from ...empresa.models import Permiso
 
 
 class AuthViewSet(viewsets.ViewSet):
@@ -27,18 +27,25 @@ class AuthViewSet(viewsets.ViewSet):
         custom = CustomDetailSerializer(user_empresa.custom).data
         user = UsuarioDetailSerializer(user_obj).data
         roles = user_empresa.roles.values_list('nombre', flat=True)
+        permisos_list = list(
+            Permiso.objects.filter(roles__in=user_empresa.roles.all())
+            .values_list('nombre', flat=True)
+            .distinct()
+)
         refresh = RefreshToken.for_user(user_obj)   
         refresh['empresa'] = str(empresa.id)  # ✅ Guardamos la empresa en el token
         access_token = str(refresh.access_token)
         refresh_token = str(refresh)
+        print(permisos_list)
         # --- Respuesta con cookies y access token ---
         response = Response({'access': access_token,
                              'empresa': empresa.id,
                              'user_empresa': user_empresa.id,
                              'usuario': user,
                              'roles': list(roles),
+                             'permisos' : permisos_list,
                              'custom': custom
-                             }, 
+                             },
                             status=status.HTTP_200_OK)
         response.set_cookie(
             key='sessionToken',
