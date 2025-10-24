@@ -5,6 +5,7 @@ from ...empresa.models import UserEmpresa
 from ..serializers import (AsientoContableCreateSerializer,
                            AsientoContableListSerializer,
                            AsientoContableDetailSerializer)
+from ...utils.log import registrar_evento
 
 
 class AsientoContableViewSet(viewsets.ModelViewSet):
@@ -22,8 +23,52 @@ class AsientoContableViewSet(viewsets.ModelViewSet):
         return super().get_serializer_class()
     
     def create(self, request, *args, **kwargs):
-        print("Payload recibido:", request.data)  # 👈 aquí ves el JSON que envía el frontend
-        return super().create(request, *args, **kwargs)
+        # Ejecutar el create normal
+        response = super().create(request, *args, **kwargs)
+
+        # 🔹 Obtener token de sesión y empresa_id
+        session_token = request.COOKIES.get("sessionToken")
+        empresa_id = request.auth['empresa']
+        usuario_id = request.user.id
+
+        # Registrar evento
+        registrar_evento(
+            id_sesion=session_token,
+            empresa_id=empresa_id,
+            usuario_id=usuario_id,
+            datos_usuario=None,  # No se repite info, la sesión ya existe
+            nivel="INFO",
+            accion="Creación de asiento contable",
+            detalle=f"El usuario {usuario_id} creó un nuevo asiento contable con ID {response.data.get('id')}"
+        )
+
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        # Obtener objeto antes de eliminarlo
+        instance = self.get_object()
+        asiento_id = getattr(instance, "id", "desconocido")
+
+        # Ejecutar eliminación
+        response = super().destroy(request, *args, **kwargs)
+
+        # 🔹 Obtener token de sesión y empresa_id
+        session_token = request.COOKIES.get("sessionToken")
+        empresa_id = request.auth['empresa']
+        usuario_id = request.user.id
+
+        # Registrar evento
+        registrar_evento(
+            id_sesion=session_token,
+            empresa_id=empresa_id,
+            usuario_id=usuario_id,
+            datos_usuario=None,
+            nivel="WARNING",  # Nivel alto para operaciones sensibles
+            accion="Eliminación de asiento contable",
+            detalle=f"El usuario {usuario_id} eliminó el asiento contable con ID {asiento_id}."
+        )
+
+        return response
     
     def get_queryset(self):
         request = self.request

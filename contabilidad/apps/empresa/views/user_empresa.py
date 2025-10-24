@@ -24,13 +24,15 @@ class UserEmpresaViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         request = self.request
-        empresa = request.auth.get('empresa')
 
-        queryset = UserEmpresa.objects.filter(empresa=empresa).distinct()
+        # Por defecto, tomar la empresa del token
+        empresa_id = request.auth.get('empresa')
 
-        if self.action == "list":
-            # Solo para la lista, excluir admins
+        queryset = UserEmpresa.objects.filter(empresa=empresa_id).distinct()
+
+        if self.action == "list" :
+            # Solo usuarios normales, excluir roles admin
             queryset = queryset.exclude(roles__nombre='admin')
 
-        # retrieve, update, partial_update, destroy: no se excluye admin
         return queryset
+

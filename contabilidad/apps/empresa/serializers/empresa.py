@@ -22,7 +22,7 @@ class EmpresaListSerializer(serializers.ModelSerializer):
         fields = ['id','nombre']
 
 class EmpresaDetailSerializer(serializers.ModelSerializer):
-    usuarios = UserEmpresaListSerializer(many=True, read_only=True)
+    usuarios = UserEmpresaListSerializer(many=True, read_only=True,source="user_empresas")
     
     class Meta:
         model = Empresa
