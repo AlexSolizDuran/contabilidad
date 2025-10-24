@@ -15,7 +15,9 @@ from contabilidad.apps.empresa.models.user_empresa import UserEmpresa
 
 
 @api_view(['POST'])
+
 @permission_classes([IsAuthenticated])
+
 def generar_reporte_ia(request):
     """
     Endpoint para generar reportes usando IA basado en texto natural.
@@ -54,7 +56,7 @@ def generar_reporte_ia(request):
             usuario=usuario,
             empresa=empresa
         )
-        
+        print("eest es el ereuslta",resultado)
         # Serializar respuesta
         response_serializer = ReporteResponseSerializer(resultado)
         

@@ -206,6 +206,7 @@ class IAReporteService:
         """
         Genera el reporte basado en la interpretación de la IA.
         """
+        print("interpretacion",interpretacion)
         tipo_reporte = interpretacion.get('tipo_reporte', 'otro')
         
         if tipo_reporte == 'balance_general':
@@ -356,7 +357,7 @@ class IAReporteService:
             cuentas_query = cuentas_query.filter(codigo__in=cuentas_especificas)
         
         cuentas_detalle = []
-        
+        print("fechas",fecha_fin,fecha_inicio)
         for cuenta in cuentas_query:
             movimientos = Movimiento.objects.filter(
                 cuenta=cuenta,
@@ -409,20 +410,22 @@ class IAReporteService:
         fecha_fin = interpretacion.get('fecha_fin')
         
         if not fecha_inicio:
-            fecha_inicio = datetime(datetime.now().year, 1, 1)
+            fecha_inicio = datetime(datetime.now().year, 1, 1).replace(hour=0, minute=0, second=0)
         else:
-            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d')
+            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').replace(hour=0, minute=0, second=0)
             
         if not fecha_fin:
-            fecha_fin = datetime.now()
+            fecha_fin = datetime.now().replace(hour=23, minute=59, second=59)
         else:
-            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d')
+            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
         
         asientos = AsientoContable.objects.filter(
             empresa=empresa,
             estado='APROBADO',
-            created_at__range=[fecha_inicio, fecha_fin]
+            created_at__range=[fecha_inicio, fecha_fin],
         ).order_by('created_at')
+        
+        print(asientos)
         
         asientos_detalle = []
         
@@ -444,7 +447,7 @@ class IAReporteService:
                     for m in movimientos
                 ]
             })
-        
+            
         return {
             'tipo': 'libro_diario',
             'periodo': {

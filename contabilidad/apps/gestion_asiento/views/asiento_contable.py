@@ -27,10 +27,9 @@ class AsientoContableViewSet(viewsets.ModelViewSet):
         response = super().create(request, *args, **kwargs)
 
         # 🔹 Obtener token de sesión y empresa_id
-        session_token = request.COOKIES.get("sessionToken")
+        session_token = request.COOKIES.get("sessionToken") or request.headers.get('Authorization', '').split(' ')[-1]
         empresa_id = request.auth['empresa']
         usuario_id = request.user.id
-
         # Registrar evento
         registrar_evento(
             id_sesion=session_token,
@@ -39,7 +38,7 @@ class AsientoContableViewSet(viewsets.ModelViewSet):
             datos_usuario=None,  # No se repite info, la sesión ya existe
             nivel="INFO",
             accion="Creación de asiento contable",
-            detalle=f"El usuario {usuario_id} creó un nuevo asiento contable con ID {response.data.get('id')}"
+            detalle=f"El usuario {usuario_id} creó un nuevo asiento contable con ID {response.data.get('numero')}"
         )
 
         return response

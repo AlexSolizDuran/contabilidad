@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from typing import Dict, Any
-
+from datetime import datetime
 
 class SolicitudReporteSerializer(serializers.Serializer):
     """
@@ -152,8 +152,18 @@ class ReporteResponseSerializer(serializers.Serializer):
     """
     success = serializers.BooleanField()
     solicitud_original = serializers.CharField()
-    interpretacion = InterpretacionSerializer(required=False)
+    interpretacion = serializers.DictField(required=False)
     reporte = serializers.DictField(required=False)
-    fecha_generacion = serializers.DateTimeField()
+    fecha_generacion = serializers.DateTimeField(required=False, allow_null=True)
     empresa = serializers.CharField()
-    error = serializers.CharField(required=False)
+    error = serializers.CharField(required=False, allow_null=True)
+
+    def to_representation(self, instance):
+        """
+        Si no se proporciona 'fecha_generacion', se inserta automáticamente
+        la fecha y hora actual en formato ISO.
+        """
+        data = super().to_representation(instance)
+        if not data.get("fecha_generacion"):
+            data["fecha_generacion"] = datetime.utcnow().isoformat() + "Z"
+        return data

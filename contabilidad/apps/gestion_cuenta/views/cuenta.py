@@ -72,7 +72,7 @@ class CuentaViewSet(viewsets.ModelViewSet):
             datos_usuario=None,  # no es necesario pasar datos_usuario en eventos posteriores
             nivel="INFO",
             accion="Creación de cuenta",
-            detalle=f"El usuario {username} creó una nueva cuenta con ID {response.data.get('id')} y nombre '{response.data.get('nombre')}'."
+            detalle=f"El usuario {username} creó una nueva cuenta con ID {response.data.get('codigo')} y nombre '{response.data.get('nombre')}'."
         )
 
         return response
