@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.db.models.functions import Cast, Substr
 from django.db.models import CharField
 
+from ...utils.log import registrar_evento  # 🔹 Importamos la función de log
 
 from ..models import Cuenta,ClaseCuenta
 from ...gestion_asiento.models import Movimiento
@@ -54,6 +55,50 @@ class CuentaViewSet(viewsets.ModelViewSet):
         ).order_by('primer_digito', 'codigo')           # ordena por primer dígito y luego por código completo
 
         return qs
+    
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+
+        # 🔹 Obtener session token de las cookies o header
+        token = request.COOKIES.get("sessionToken") or request.headers.get('Authorization', '').split(' ')[-1]
+        username = request.user.id
+        empresa_id = str(request.auth.get('empresa'))
+
+        # 🔹 Registrar evento
+        registrar_evento(
+            id_sesion=token,
+            empresa_id=empresa_id,
+            usuario_id=username,
+            datos_usuario=None,  # no es necesario pasar datos_usuario en eventos posteriores
+            nivel="INFO",
+            accion="Creación de cuenta",
+            detalle=f"El usuario {username} creó una nueva cuenta con ID {response.data.get('id')} y nombre '{response.data.get('nombre')}'."
+        )
+
+        return response
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        cuenta_id = getattr(instance, "id", "desconocido")
+        cuenta_nombre = getattr(instance, "nombre", "desconocido")
+
+        response = super().destroy(request, *args, **kwargs)
+
+        token = request.COOKIES.get("sessionToken") or request.headers.get('Authorization', '').split(' ')[-1]
+        username = request.user.id
+        empresa_id = str(request.auth.get('empresa'))
+
+        registrar_evento(
+            id_sesion=token,
+            empresa_id=empresa_id,
+            usuario_id=username,
+            datos_usuario=None,
+            nivel="WARNING",
+            accion="Eliminación de cuenta",
+            detalle=f"El usuario {username} eliminó la cuenta con ID {cuenta_id} y nombre '{cuenta_nombre}'."
+        )
+
+        return response
     
     @action(detail=True, methods=['get'])
     def movimientos(self, request, pk=None):
