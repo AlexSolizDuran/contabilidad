@@ -143,7 +143,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 #configurar para la base datos
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -154,20 +154,21 @@ DATABASES = {
         'PORT': config('DB_PORT'),
     }
 }
-
-LIBELULA_APPKEY = config('LIBELULA_APPKEY')
-LIBELULA_URL = config( 'LIBELULA_URL')
-DJANGO_PUBLIC_URL = config('DJANGO_PUBLIC_URL')
-
-
 '''
+
+LIBELULA_APPKEY = config('LIBELULA_APPKEY', default='11bb10ce-68ba-4af1-8eb7-4e6624fed729')
+LIBELULA_URL = config( 'LIBELULA_URL', default='https://api.libelula.bo')
+DJANGO_PUBLIC_URL = config('DJANGO_PUBLIC_URL', default='http://172.18.0.2:8080')
+
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / "db.sqlite3",
     }
 }
-'''
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
