@@ -5,7 +5,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema
 from ..serializers import LoginSerializer, RegisterSerializer, UsuarioDetailSerializer
 from django.contrib.auth import get_user_model
-from ...utils.recaptcha import validate_recaptcha
 
 
 User = get_user_model()
@@ -15,11 +14,6 @@ class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
-        # Validar reCAPTCHA antes de procesar el login
-        # El frontend envia 'recaptcha_token' obtenido del widget de Google
-        recaptcha_token = request.data.get('recaptcha_token')
-        validate_recaptcha(recaptcha_token)
-        
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
@@ -89,11 +83,6 @@ class RegisterView(generics.GenericAPIView):
     serializer_class = RegisterSerializer
 
     def post(self, request):
-        # Validar reCAPTCHA antes de procesar el registro
-        # El frontend envia 'recaptcha_token' obtenido del widget de Google
-        recaptcha_token = request.data.get('recaptcha_token')
-        validate_recaptcha(recaptcha_token)
-        
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()

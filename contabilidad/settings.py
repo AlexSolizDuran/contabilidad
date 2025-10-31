@@ -195,14 +195,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 #15/10/2025
 CORS_ALLOWED_ORIGINS = [
-    # Desarrollo local
-    "http://localhost:3000",
-    
-    # Produccion - Frontend en Google Cloud Run
-    "https://contafrontoficial-393159630636.northamerica-south1.run.app",
-    
-    # NOTA: Si el backend tambien esta en la nube, agregar su URL aqui
-    # Ejemplo: "https://backend-conta-xxx.run.app",
+    #"https://contabilidad-1.onrender.com",
+    #"http://localhost:3000",
+    #"https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
+    #"https://next-conta.vercel.app",
+    #"https://contabilidad-1.onrender.com",
+    #"http://172.18.0.2:8080",
+    #"https://next-conta-git-render-alexs-projects-f8cae405.vercel.app",
+    #"https://next-conta.vercel.app",
+    "https://contafrontoficial-393159630636.northamerica-south1.run.app"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -218,11 +219,5 @@ IA_MAX_CUENTAS_REPORTE = 50
 IA_MAX_ASIENTOS_REPORTE = 100
 IA_CONTEXTO_EMPRESA_LIMIT = 20
 IA_DEFAULT_YEAR = None  # None = año actual
-
-# Configuracion de Google reCAPTCHA v2
-# La secret key debe estar en el archivo .env
-# Para obtener las claves: https://www.google.com/recaptcha/admin
-# Dominios permitidos: localhost, 127.0.0.1, y tu dominio de produccion
-RECAPTCHA_SECRET_KEY = config('RECAPTCHA_SECRET_KEY', default='')
 
 
