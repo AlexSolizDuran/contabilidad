@@ -7,6 +7,7 @@ from .views import (EmpresaViewSet,
                     UserEmpresaViewSet,
                     AuthViewSet,
                     FavoritoAPIView)
+from .views.invitacion import AcceptInvitationView
 
 router = routers.DefaultRouter()
 router.register(r'empresa', EmpresaViewSet, basename='empresa')
@@ -22,4 +23,5 @@ urlpatterns = [
     path('favorito/<int:pk>/', FavoritoAPIView.as_view(), name='favorito-detalle'),
 
     path('', include(router.urls)),
+    path('invitacion/accept/', AcceptInvitationView.as_view(), name='empresa-invitacion-accept'),
 ]

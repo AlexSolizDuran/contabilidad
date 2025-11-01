@@ -1,11 +1,29 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from ..plantilla.models import PlantillaClase,PlantillaRol
-from ..gestion_cuenta.models import ClaseCuenta
+from ..plantilla.models import PlantillaClase,PlantillaRol, PlantillaCuenta
+from ..gestion_cuenta.models import ClaseCuenta, Cuenta
 from .models import Empresa,RolEmpresa,Permiso
+from django.db.models.signals import post_delete
+import traceback
+import os
+
+
+@receiver(post_delete, sender=Empresa)
+def log_empresa_delete(sender, instance, using, **kwargs):
+    try:
+        # Append a log with stacktrace to help find unexpected deletions
+        log_path = os.path.join(os.path.dirname(__file__), '..', '..', 'empresa_deletes.log')
+        with open(log_path, 'a', encoding='utf-8') as f:
+            f.write(f"Empresa deleted: id={instance.id}, nombre={instance.nombre}\n")
+            f.write(''.join(traceback.format_stack()))
+            f.write('\n---\n')
+    except Exception:
+        # Never raise from the signal logger
+        pass
 
 @receiver(post_save, sender=Empresa)
 def crear_clases_por_defecto(sender, instance, created, **kwargs):
+    print("Clase cuentas signal triggered")
     if created:
         # Primero, crear un diccionario temporal para mapear plantillas a clases
         plantilla_a_cuenta = {}
@@ -27,6 +45,24 @@ def crear_clases_por_defecto(sender, instance, created, **kwargs):
 
             # Guardamos la relación temporal
             plantilla_a_cuenta[plantilla.id] = cuenta
+
+@receiver(post_save, sender=Empresa)
+def crear_cuentas_por_defecto(sender, instance, created, **kwargs):
+    """
+    Cuando se crea una Empresa, clonar las PlantillaCuenta dentro de Cuentas de esa empresa.
+    """
+    if created:
+        print(f"Creando cuentas para la empresa {instance.nombre}")
+
+        for plantilla in PlantillaCuenta.objects.all().order_by("codigo"):
+            Cuenta.objects.get_or_create(
+                empresa=instance,
+                codigo=plantilla.codigo,
+                defaults={
+                    "nombre": plantilla.nombre,
+                    "estado": plantilla.estado,
+                }
+            )
 
 @receiver(post_save, sender=Empresa)
 def crear_rol_por_defecto(sender, instance, created, **kwargs):
@@ -81,3 +117,4 @@ def crear_rol_por_defecto(sender, instance, created, **kwargs):
                 rol.permisos.set(Permiso.objects.filter(nombre__in=permisos_auditor))
 
             plantilla_rol[plantilla.id] = rol
+

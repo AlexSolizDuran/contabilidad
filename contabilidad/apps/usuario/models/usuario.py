@@ -32,6 +32,8 @@ class Persona(models.Model):
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True, blank=True, null=True)
+    # Verificación por correo: el usuario no podrá iniciar sesión hasta que esto sea True
+    verified = models.BooleanField(default=False)
     persona = models.OneToOneField('persona', on_delete=models.CASCADE, related_name='usuario')
 
     is_staff = models.BooleanField(default=False)

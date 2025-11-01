@@ -3,6 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from ..models import Empresa, UserEmpresa
+from django.db.models import Q
 from ..serializers import (EmpresaCreateSerializer,
                            EmpresaDetailSerializer,
                            EmpresaListSerializer)
@@ -24,8 +25,10 @@ class EmpresaViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def mis_empresas(self, request):
         user = request.user
-        user_empresas = UserEmpresa.objects.filter(usuario=user)
-        empresas = [user_empresa.empresa for user_empresa in user_empresas]
+        # Mostrar empresas donde el usuario tiene la relación aceptada
+        # O mostrar empresas donde el usuario es administrador (las que creó)
+        user_empresas = UserEmpresa.objects.filter(usuario=user).filter(Q(estado='ACEPTADA') | Q(roles__nombre='admin')).distinct()
+        empresas = [ue.empresa for ue in user_empresas]
         serializer = EmpresaListSerializer(empresas, many=True)
-        
+
         return Response(serializer.data)

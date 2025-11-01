@@ -1,7 +1,7 @@
 # plantilla/management/commands/seed_all.py
 from django.core.management.base import BaseCommand
 from ...seeds import (
-    seed_permiso,seed_custom,seed_plantilla_clase,seed_user,seed_plantilla_rol
+    seed_permiso, seed_custom, seed_plantilla_clase, seed_plantilla_cuenta, seed_user, seed_plantilla_rol, seed_empresas
 )
 from ....suscripcion.seeds import seed_inicial
 class Command(BaseCommand):
@@ -9,7 +9,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         orden_seeders = [
-            seed_user,seed_permiso,seed_custom,seed_plantilla_clase,seed_plantilla_rol,seed_inicial
+            seed_user, seed_permiso, seed_custom, seed_plantilla_clase, seed_plantilla_cuenta, seed_plantilla_rol, 
+            seed_inicial, seed_empresas
         ]
 
         for seeder in orden_seeders:

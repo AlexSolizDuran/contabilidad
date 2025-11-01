@@ -158,7 +158,7 @@ DATABASES = {
 
 LIBELULA_APPKEY = config('LIBELULA_APPKEY', default='11bb10ce-68ba-4af1-8eb7-4e6624fed729')
 LIBELULA_URL = config( 'LIBELULA_URL', default='https://api.libelula.bo')
-DJANGO_PUBLIC_URL = config('DJANGO_PUBLIC_URL', default='http://172.18.0.2:8080')
+DJANGO_PUBLIC_URL = config('DJANGO_PUBLIC_URL', default='http://127.0.0.1:8000')
 
 
 
@@ -219,5 +219,14 @@ IA_MAX_CUENTAS_REPORTE = 50
 IA_MAX_ASIENTOS_REPORTE = 100
 IA_CONTEXTO_EMPRESA_LIMIT = 20
 IA_DEFAULT_YEAR = None  # None = año actual
+
+# Email / SMTP settings (leer desde .env usando python-decouple)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='proyconta@gmail.com')
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='ayrtondazamiranda@gmail.com')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='qlgkftqgfsldomoy')
 
 

@@ -24,13 +24,28 @@ class UserEmpresaViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         request = self.request
+        # Por defecto, tomar la empresa del token (si existe)
+        empresa_id = None
+        try:
+            if request.auth and hasattr(request.auth, 'get'):
+                empresa_id = request.auth.get('empresa')
+        except Exception:
+            empresa_id = None
 
-        # Por defecto, tomar la empresa del token
-        empresa_id = request.auth.get('empresa')
+        # Construir queryset base: empresas aceptadas para la empresa del token
+        from django.db.models import Q
 
-        queryset = UserEmpresa.objects.filter(empresa=empresa_id).distinct()
+        base_q = Q()
+        if empresa_id:
+            base_q |= Q(empresa=empresa_id, estado='ACEPTADA')
 
-        if self.action == "list" :
+        # Además permitir que el propio usuario vea su relación (incluso si está PENDIENTE)
+        if request.user and request.user.is_authenticated:
+            base_q |= Q(usuario=request.user)
+
+        queryset = UserEmpresa.objects.filter(base_q).distinct()
+
+        if self.action == "list":
             # Solo usuarios normales, excluir roles admin
             queryset = queryset.exclude(roles__nombre='admin')
 
